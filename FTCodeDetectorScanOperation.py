@@ -6,6 +6,8 @@ import os
 import re
 import threading
 
+import FTCodeDetectorConst
+
 from FTCodeDetectorModel import *
 from FTCodeDetectorFileManager import FTCodeDetectorFileManager
 from FTCodeDetectorModelStack import FTCodeDetectorModelStack
@@ -101,7 +103,7 @@ class FTCodeDetectorScanOperation(threading.Thread):
                     if stack.empty() == False:
                         stack.top().source_lines.append((l, lines[l]))
                         model.business = groups[2]
-                        model.user_defined.append(self.add_marco(groups))
+                        model.user_defined.append(self.add_marco(groups, FTCodeDetectorConst.BUSINESS_DESC))
 
                 else:
                     if stack.empty() == False:

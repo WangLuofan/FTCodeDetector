@@ -71,7 +71,6 @@ class FTCodeDetectorFeiShuRequester():
         for (_, file) in files.items():
             self.delete_file(file)
     
-    # perm: view(可阅读角色)/edit(可编辑角色)/full_access(可管理角色)
     def add_member_perm(self, nick: str, file: FTCodeDetectorFeiShuFile, perm: str) -> bool:
         if file == None or nick == None or len(nick) == 0 \
             or perm == None or len(perm) == 0 \

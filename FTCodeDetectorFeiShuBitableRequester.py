@@ -113,6 +113,7 @@ class FTCodeDetectorFeiShuBitableRequester(FTCodeDetectorFeiShuRequester):
             .request_body(AppTableField.builder()
                           .field_name(field.field_title)
                           .type(field.get_field_type())
+                          .ui_type(field.get_field_ui_type())
                           .build()) \
                     .build()
         
@@ -132,7 +133,7 @@ class FTCodeDetectorFeiShuBitableRequester(FTCodeDetectorFeiShuRequester):
             return
         
         all_fields = self.list_fields(file)
-        fields_need_create: [FTCodeDetectorFeiShuBitableField] = []
+        fields_need_create: [FTCodeDetectorFeiShuBitableField] = fields if all_fields == None else []
 
         for field in fields:
             if field not in all_fields:

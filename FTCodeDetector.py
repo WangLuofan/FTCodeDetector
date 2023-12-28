@@ -6,6 +6,7 @@ import sys
 import threading
 import multiprocessing
 
+import FTCodeDetectorConst
 import FTCodeDetectorConfig
 
 from datetime import datetime
@@ -33,6 +34,28 @@ class FTCodeDetector():
         print('*******************************')
         print()
 
+    def define_const(self):
+        FTCodeDetectorConst.FILE_DESC = '所属文件'
+        FTCodeDetectorConst.SOURCE_LINE_DESC = '所在行数'
+        FTCodeDetectorConst.PLATFORM_DESC = '所属平台'
+        FTCodeDetectorConst.BUSINESS_DESC = '所属业务'
+
+        FTCodeDetectorConst.FIELD_TYPE_TEXT = 'text'
+        FTCodeDetectorConst.FIELD_TYPE_DATETIME = 'datetime'
+        FTCodeDetectorConst.FEILD_TYPE_SINGLE = 'single'
+        FTCodeDetectorConst.FIELD_TYPE_CHECKBOX = 'checkbox'
+        FTCodeDetectorConst.FIELD_TYPE_PERSON = 'person'
+
+        FTCodeDetectorConst.FIELD_UI_TYPE_TEXT = 'Text'
+        FTCodeDetectorConst.FIELD_UI_TYPE_DATETIME = 'DateTime'
+        FTCodeDetectorConst.FIELD_UI_TYPE_SINGLE = 'SingleSelect'
+        FTCodeDetectorConst.FIELD_UI_TYPE_CHECKBOX = 'Checkbox'
+        FTCodeDetectorConst.FIELD_UI_TYPE_PERSON = 'User'
+
+        FTCodeDetectorConst.FILE_PERM_VIEW = 'view'
+        FTCodeDetectorConst.FILE_PERM_EDIT = 'edit'
+        FTCodeDetectorConst.FILE_PERM_FULLACCESS = 'full_access'
+
     def parse_arg(self) -> bool:
         if len(sys.argv) <= 1:
             self.print_usage()
@@ -58,6 +81,8 @@ class FTCodeDetector():
         return True
 
     def run(self):
+        self.define_const()
+
         if self.parse_arg() == False:
             return
 
@@ -101,8 +126,10 @@ class FTCodeDetector():
         fields: [FTCodeDetectorFeiShuBitableField] = []
         fields_dic: dict = {}
 
-        fields.append(FTCodeDetectorFeiShuBitableField('所属文件', 'text'))
-        fields.append(FTCodeDetectorFeiShuBitableField('所在行数', 'text'))
+        fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.FILE_DESC, FTCodeDetectorConst.FIELD_TYPE_TEXT))
+        fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.SOURCE_LINE_DESC, FTCodeDetectorConst.FIELD_TYPE_TEXT))
+        fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.PLATFORM_DESC, FTCodeDetectorConst.FEILD_TYPE_SINGLE))
+
         for model in models:
             for marco in model.user_defined:
                 if marco.tag in fields_dic:
@@ -120,13 +147,14 @@ class FTCodeDetector():
         records: [AppTableRecord] = []
         for model in models:
             fields = {
-                '所属文件': FTCodeDetectorFileManager.get_file_name(model.source_file),
-                '所在行数': '{start} ~ {end}'.format(start = model.start_line + 1, end = model.end_line + 1)
+                FTCodeDetectorConst.FILE_DESC: FTCodeDetectorFileManager.get_file_name(model.source_file),
+                FTCodeDetectorConst.SOURCE_LINE_DESC: '{start} ~ {end}'.format(start = model.start_line + 1, end = model.end_line + 1),
+                FTCodeDetectorConst.PLATFORM_DESC: FTCodeDetectorConfig.platform
             }
 
             for marco in model.user_defined:
                 if 'type' in marco.attributes:
-                    if marco.attributes['type'] == 'datetime':
+                    if marco.attributes['type'] == FTCodeDetectorConst.FIELD_TYPE_DATETIME:
                         try:
                             date = datetime.strptime(marco.value, r'%Y/%m/%d')
                         except ValueError:
@@ -134,14 +162,14 @@ class FTCodeDetector():
                             date = datetime.strptime('{year}/{month}/{day}'.format(year = ctime.year, month = ctime.month, day = ctime.day), r'%Y/%m/%d')
 
                         fields[marco.attributes['desc']] = int(date.timestamp() * 1000)
-                    elif marco.attributes['type'] == 'person':
-                        feiShuRequester.add_member_perm(marco.value, file, 'view')
+                    elif marco.attributes['type'] == FTCodeDetectorConst.FIELD_TYPE_PERSON:
+                        feiShuRequester.add_member_perm(marco.value, file, FTCodeDetectorConst.FILE_PERM_VIEW)
 
                         user_info = FTCodeDetectorFtoaRequester.get_user_info(marco.value)
                         if user_info != None and 'feishuId' in user_info:
-                            fields[marco.attributes['desc']] = [{
-                                'id': user_info['feishuId']
-                            }]
+                                fields[marco.attributes['desc']] = [{
+                                    'id': user_info['feishuId']
+                                }]
                         else:
                             user_info = '<at email={principal}@futunn.com>{principal}</at>'.format(principal = model.value)
                             fields[marco.attributes['desc']] = user_info
@@ -169,11 +197,10 @@ class FTCodeDetector():
             all_fields = self.get_all_fields(models)
             file: FTCodeDetectorFeiShuBitableFile = self.file_exists(feiShuRequester.list_files(), FTCodeDetectorConfig.file_token)
             if file == None:
-                file = feiShuRequester.create_file('业务代码统计')
+                file = feiShuRequester.create_file(FTCodeDetectorConfig.file_name)
                 if file == None:
                     return False
                 
-
                 default_table_id = file.table_id
                 file.table_id = feiShuRequester.create_table(file, business_type, all_fields)
 
@@ -195,6 +222,7 @@ class FTCodeDetector():
             return True
         
         feiShuRequester = FTCodeDetectorFeiShuBitableRequester(FTCodeDetectorConfig.FEISHU_APP_ID, FTCodeDetectorConfig.FEISHU_APP_SECRET)
+
         self.update_and_write(feiShuRequester)
 
         return True

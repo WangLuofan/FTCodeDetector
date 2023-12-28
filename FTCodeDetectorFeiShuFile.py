@@ -8,6 +8,8 @@ from lark_oapi.api.bitable.v1.model.app import App
 from lark_oapi.api.drive.v1 import *
 from lark_oapi.api.drive.v1.model.file import File
 
+import FTCodeDetectorConst
+
 class FTCodeDetectorFeiShuFile():
     class FTCodeDetectorFeiShuFileShortCutInfo():
         def __init__(self, shortcut_info: lark_oapi.api.drive.v1.model.file.ShortcutInfo):
@@ -57,16 +59,32 @@ class FTCodeDetectorFeiShuBitableField():
         return title in self.__dict__
 
     def get_field_type(self) -> int:
-        if self.field_type == 'text':
+        if self.field_type == FTCodeDetectorConst.FIELD_TYPE_TEXT:
             return 1
-        if self.field_type == 'datetime':
+        if self.field_type == FTCodeDetectorConst.FIELD_TYPE_DATETIME:
             return 5
-        if self.field_type == 'checkbox':
+        if self.field_type == FTCodeDetectorConst.FEILD_TYPE_SINGLE:
+            return 3
+        if self.field_type == FTCodeDetectorConst.FIELD_TYPE_CHECKBOX:
             return 7
-        if self.field_type == 'person':
+        if self.field_type == FTCodeDetectorConst.FIELD_TYPE_PERSON:
             return 11
         
         return 1
+    
+    def get_field_ui_type(self) -> str:
+        if self.field_type == FTCodeDetectorConst.FIELD_TYPE_TEXT:
+            return FTCodeDetectorConst.FIELD_UI_TYPE_TEXT
+        if self.field_type == FTCodeDetectorConst.FIELD_TYPE_DATETIME:
+            return FTCodeDetectorConst.FIELD_UI_TYPE_DATETIME
+        if self.field_type == FTCodeDetectorConst.FEILD_TYPE_SINGLE:
+            return FTCodeDetectorConst.FIELD_UI_TYPE_SINGLE
+        if self.field_type == FTCodeDetectorConst.FIELD_TYPE_CHECKBOX:
+            return FTCodeDetectorConst.FIELD_UI_TYPE_CHECKBOX
+        if self.field_type == FTCodeDetectorConst.FIELD_TYPE_PERSON:
+            return FTCodeDetectorConst.FIELD_UI_TYPE_PERSON
+        
+        return FTCodeDetectorConst.FIELD_TYPE_TEXT
 
 class FTCodeDetectorFeiShuBitableFile(FTCodeDetectorFeiShuFile):
     def __init__(self, file: File = None, bitable_app: App = None):

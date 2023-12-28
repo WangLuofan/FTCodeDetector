@@ -6,6 +6,8 @@ import sys
 import os
 import json
 
+import FTCodeDetectorConst
+
 from FTCodeDetectorFeiShuFile import FTCodeDetectorFeiShuBitableFile
 from FTCodeDetectorSingleton import FTCodeDetectorSingleton
 
@@ -39,6 +41,8 @@ class FTCodeDetectorBusinessConfig():
 class FTCodeDetectorConfig():
 
     def __init__(self):
+        FTCodeDetectorConst.DEFAULT_FILE_NAME = '业务代码扫描'
+
         self.FEISHU_APP_ID = None
         self.FEISHU_APP_SECRET = None
         self.FTOA_APP_KEY = None
@@ -46,6 +50,7 @@ class FTCodeDetectorConfig():
         self.platform = None
         self.file_token = None
         self.file_url = None
+        self.file_name = FTCodeDetectorConst.DEFAULT_FILE_NAME
         self.business: dict = {}
 
         self.load_config()
@@ -96,31 +101,33 @@ class FTCodeDetectorConfig():
         if 'file_url' in contents:
             self.file_url = contents['file_url']
 
+        if 'file_name' in contents:
+            self.file_name = contents['file_name']
+
         if 'business' in contents:
             for (business_type, item) in contents['business'].items():
-                from FTCodeDetectorConfig import FTCodeDetectorBusinessConfig
-                
                 business = FTCodeDetectorBusinessConfig(business_type, item)
                 self.business[business_type] = business
 
-    def save_config(config_file: str = 'config.json'):
+    def save_config(self, config_file: str = 'config.json'):
 
         contents: dict = {
-            'feishu_app_id': FTCodeDetectorConfig.FEISHU_APP_ID,
-            'feishu_app_secret': FTCodeDetectorConfig.FEISHU_APP_SECRET,
-            'ftoa_app_key': FTCodeDetectorConfig.FTOA_APP_KEY,
-            'ftoa_app_sec': FTCodeDetectorConfig.FTOA_APP_SEC,
-            'platform': FTCodeDetectorConfig.platform
+            'feishu_app_id': self.FEISHU_APP_ID,
+            'feishu_app_secret': self.FEISHU_APP_SECRET,
+            'ftoa_app_key': self.FTOA_APP_KEY,
+            'ftoa_app_sec': self.FTOA_APP_SEC,
+            'platform': self.platform if self.platform != None else 'Unknown',
+            'file_name': self.file_name
         }
 
-        if FTCodeDetectorConfig.file_token != None:
-            contents['file_token'] = FTCodeDetectorConfig.file_token
+        if self.file_token != None:
+            contents['file_token'] = self.file_token
 
-        if FTCodeDetectorConfig.file_url != None:
-            contents['file_url'] = FTCodeDetectorConfig.file_url
+        if self.file_url != None:
+            contents['file_url'] = self.file_url
 
         business = {}
-        for (business_type, item) in FTCodeDetectorConfig.business.items():
+        for (business_type, item) in self.business.items():
             business_contents = {}
             if item.message_card_id != None and len(item.message_card_id) > -1:
                 business_contents['message_card_id'] = item.message_card_id
