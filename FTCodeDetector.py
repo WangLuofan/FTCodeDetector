@@ -13,7 +13,6 @@ from lark_oapi.api.bitable.v1 import *
 
 from FTCodeDetectorModel import *
 from FTCodeDetectorFtoaRequester import FTCodeDetectorFtoaRequester
-from FTCodeDetectorConfigUtil import FTCodeDetectorConfigUtil
 from FTCodeDetectorFeiShuFile import *
 from FTCodeDetectorScanOperation import FTCodeDetectorScanOperation
 from FTCodeDetectorFileManager import FTCodeDetectorFileManager
@@ -242,4 +241,4 @@ if __name__ == '__main__':
         codeDetector.print()
 
     del result
-    FTCodeDetectorConfigUtil.save_config()
+    FTCodeDetectorConfig.save_config()
