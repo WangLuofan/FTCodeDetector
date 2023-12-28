@@ -3,7 +3,10 @@
 # @Author: cairowang
 
 import lark_oapi
+from lark_oapi.api.bitable.v1.model.app import App
+
 from lark_oapi.api.drive.v1 import *
+from lark_oapi.api.drive.v1.model.file import File
 
 class FTCodeDetectorFeiShuFile():
     class FTCodeDetectorFeiShuFileShortCutInfo():
@@ -11,14 +14,73 @@ class FTCodeDetectorFeiShuFile():
             self.target_token = shortcut_info.target_token
             self.target_type = shortcut_info.target_type
 
-    def __init__(self, f: lark_oapi.api.drive.v1.model.file.File):
-        self.token = f.token
-        self.name = f.name
-        self.type = f.type
-        self.parent_token = f.parent_token
-        self.url = f.url
-        self.created_time = f.created_time
-        self.modified_time = f.modified_time
-        self.owner_id = f.owner_id
+    def __init__(self, file: lark_oapi.api.drive.v1.model.file.File):
+        self.token = None
+        self.name = None
+        self.type = None
+        self.parent_token = None
+        self.url = None
+        self.created_time = None
+        self.modified_time = None
+        self.owner_id = None
+        self.shortcut_info = None
 
-        self.shortcut_info = self.FTCodeDetectorFeiShuFileShortCutInfo(f.shortcut_info)
+        if file != None:
+            self.token = file.token
+            self.name = file.name
+            self.type = file.type
+            self.parent_token = file.parent_token
+            self.url = file.url
+            self.created_time = file.created_time
+            self.modified_time = file.modified_time
+            self.owner_id = file.owner_id
+
+            if file.shortcut_info != None:
+                self.shortcut_info = self.FTCodeDetectorFeiShuFileShortCutInfo(file.shortcut_info)
+
+    def update(self, business_config):
+        if business_config.file_url != None:
+            self.url = business_config.file_url
+
+class FTCodeDetectorFeiShuBitableField():
+    def __init__(self, title: str, type: str) -> None:
+        self.field_title = title
+        self.field_type = type
+
+        self.__dict__[title] = type
+
+    def field_exist(self, title: str) -> bool:
+        return title in self.__dict__
+
+    def get_field_type(self) -> int:
+        if self.field_type == 'text':
+            return 1
+        if self.field_type == 'datetime':
+            return 5
+        if self.field_type == 'checkbox':
+            return 7
+        if self.field_type == 'person':
+            return 11
+        
+        return 1
+
+class FTCodeDetectorFeiShuBitableFile(FTCodeDetectorFeiShuFile):
+    def __init__(self, file: File = None, bitable_app: App = None):
+        super().__init__(file)
+        self.table_id = None
+
+        if bitable_app != None:
+            self.token = bitable_app.app_token
+            self.name = bitable_app.name
+            self.url = bitable_app.url
+            self.table_id = bitable_app.default_table_id
+            self.type = 'bitable'
+
+    def update(self, business_config):
+        if business_config == None:
+            return
+        
+        super().update(business_config)
+        
+        if business_config.table_id != None:
+            self.table_id = business_config.table_id

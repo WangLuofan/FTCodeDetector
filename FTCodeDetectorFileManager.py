@@ -27,7 +27,13 @@ class FTCodeDetectorFileManager():
         return False
 
     def get_source_files(self):
-        return self.__get_source_files(self.path)
+        path = os.getcwd()
+
+        source_files = self.__get_source_files(self.path)
+        
+        os.chdir(path)
+
+        return source_files
     
     def __get_source_files(self, path: str):
         os.chdir(path)

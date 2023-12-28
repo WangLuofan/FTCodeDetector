@@ -1,0 +1,15 @@
+{
+    "feishu_app_id": "cli_a5e28924f320d00c",
+    "feishu_app_secret": "I1bDQrirCFGS5PkKfA47rgX7ZKZRrrHv",
+    "ftoa_app_key": "5fba41da7c5e5db3327fe3d31228e5cc",
+    "ftoa_app_sec": "2c0cbab50583a1c777eebe1c61124417",
+    "file_token": "DlRQb3VtAa23WYs1rFBc4jLrnSh",
+    "file_url": "https://futu.feishu.cn/base/DlRQb3VtAa23WYs1rFBc4jLrnSh?table=tbl127kaInJWmMLL&view=vewsGfgDzI",
+    "platform": "iOS",
+    "business": {
+        "expire" : {
+            "message_card_id": "ctp_AAyuu48Zmctz",
+            "table_id": "tbl127kaInJWmMLL"
+        }
+    }
+}
