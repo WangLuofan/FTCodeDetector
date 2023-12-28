@@ -6,7 +6,7 @@ import sys
 import os
 import json
 
-import FTCodeDetectorConst
+from FTCodeDetectorConstDefine import *
 
 from FTCodeDetectorFeiShuFile import FTCodeDetectorFeiShuBitableFile
 from FTCodeDetectorSingleton import FTCodeDetectorSingleton
@@ -41,8 +41,6 @@ class FTCodeDetectorBusinessConfig():
 class FTCodeDetectorConfig():
 
     def __init__(self):
-        FTCodeDetectorConst.DEFAULT_FILE_NAME = '业务代码扫描'
-
         self.FEISHU_APP_ID = None
         self.FEISHU_APP_SECRET = None
         self.FTOA_APP_KEY = None

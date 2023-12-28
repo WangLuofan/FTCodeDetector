@@ -34,28 +34,6 @@ class FTCodeDetector():
         print('*******************************')
         print()
 
-    def define_const(self):
-        FTCodeDetectorConst.FILE_DESC = '所属文件'
-        FTCodeDetectorConst.SOURCE_LINE_DESC = '所在行数'
-        FTCodeDetectorConst.PLATFORM_DESC = '所属平台'
-        FTCodeDetectorConst.BUSINESS_DESC = '所属业务'
-
-        FTCodeDetectorConst.FIELD_TYPE_TEXT = 'text'
-        FTCodeDetectorConst.FIELD_TYPE_DATETIME = 'datetime'
-        FTCodeDetectorConst.FEILD_TYPE_SINGLE = 'single'
-        FTCodeDetectorConst.FIELD_TYPE_CHECKBOX = 'checkbox'
-        FTCodeDetectorConst.FIELD_TYPE_PERSON = 'person'
-
-        FTCodeDetectorConst.FIELD_UI_TYPE_TEXT = 'Text'
-        FTCodeDetectorConst.FIELD_UI_TYPE_DATETIME = 'DateTime'
-        FTCodeDetectorConst.FIELD_UI_TYPE_SINGLE = 'SingleSelect'
-        FTCodeDetectorConst.FIELD_UI_TYPE_CHECKBOX = 'Checkbox'
-        FTCodeDetectorConst.FIELD_UI_TYPE_PERSON = 'User'
-
-        FTCodeDetectorConst.FILE_PERM_VIEW = 'view'
-        FTCodeDetectorConst.FILE_PERM_EDIT = 'edit'
-        FTCodeDetectorConst.FILE_PERM_FULLACCESS = 'full_access'
-
     def parse_arg(self) -> bool:
         if len(sys.argv) <= 1:
             self.print_usage()
@@ -81,7 +59,6 @@ class FTCodeDetector():
         return True
 
     def run(self):
-        self.define_const()
 
         if self.parse_arg() == False:
             return
@@ -222,7 +199,6 @@ class FTCodeDetector():
             return True
         
         feiShuRequester = FTCodeDetectorFeiShuBitableRequester(FTCodeDetectorConfig.FEISHU_APP_ID, FTCodeDetectorConfig.FEISHU_APP_SECRET)
-
         self.update_and_write(feiShuRequester)
 
         return True

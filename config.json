@@ -3,22 +3,5 @@
    "feishu_app_secret": "I1bDQrirCFGS5PkKfA47rgX7ZKZRrrHv",
    "ftoa_app_key": "5fba41da7c5e5db3327fe3d31228e5cc",
    "ftoa_app_sec": "2c0cbab50583a1c777eebe1c61124417",
-   "platform": "iOS",
-   "file_name": "\u4e1a\u52a1\u4ee3\u7801\u626b\u63cf",
-   "file_token": "Kw6Vbxr36agUaCsAQb7crC0UnTh",
-   "file_url": "https://futu.feishu.cn/base/Kw6Vbxr36agUaCsAQb7crC0UnTh",
-   "business": {
-      "test": {
-         "table_id": "tblSz1VngsPN5Gb5",
-         "file_url": "https://futu.feishu.cn/base/Kw6Vbxr36agUaCsAQb7crC0UnTh?table=tblSz1VngsPN5Gb5"
-      },
-      "diff": {
-         "table_id": "tblMhD5t9PbISeMO",
-         "file_url": "https://futu.feishu.cn/base/Kw6Vbxr36agUaCsAQb7crC0UnTh?table=tblMhD5t9PbISeMO"
-      },
-      "expire": {
-         "table_id": "tblApPnz20lEGBTF",
-         "file_url": "https://futu.feishu.cn/base/Kw6Vbxr36agUaCsAQb7crC0UnTh?table=tblApPnz20lEGBTF"
-      }
-   }
+   "platform": "iOS"
 }

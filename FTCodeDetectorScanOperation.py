@@ -6,7 +6,7 @@ import os
 import re
 import threading
 
-import FTCodeDetectorConst
+from FTCodeDetectorConstDefine import *
 
 from FTCodeDetectorModel import *
 from FTCodeDetectorFileManager import FTCodeDetectorFileManager
