@@ -49,6 +49,10 @@ class FTCodeDetectorFeiShuBitableField():
 
         self.__dict__[title] = type
 
+    def __eq__(self, __value: object) -> bool:
+        return self.field_title == __value.field_title
+
+
     def field_exist(self, title: str) -> bool:
         return title in self.__dict__
 

@@ -167,13 +167,13 @@ class FTCodeDetector():
         for (business_type, models) in result.items():
             business_config = FTCodeDetectorConfig.get_business(business_type)
 
+            all_fields = self.get_all_fields(models)
             file: FTCodeDetectorFeiShuBitableFile = self.file_exists(feiShuRequester.list_files(), FTCodeDetectorConfig.file_token)
             if file == None:
                 file = feiShuRequester.create_file('业务代码统计')
                 if file == None:
                     return False
                 
-                all_fields = self.get_all_fields(models)
 
                 default_table_id = file.table_id
                 file.table_id = feiShuRequester.create_table(file, business_type, all_fields)
@@ -182,12 +182,11 @@ class FTCodeDetector():
 
                 self.update_config(file, business_type)
             elif business_config.table_id == None:
-                all_fields = self.get_all_fields(models)
                 file.table_id = feiShuRequester.create_table(file, business_type, all_fields)
-
                 business_config.update(file)
             else:
                 file.update(business_config)
+                feiShuRequester.create_fields_if_needed(file, all_fields)
             
             self.write_file(feiShuRequester, file, models)
 

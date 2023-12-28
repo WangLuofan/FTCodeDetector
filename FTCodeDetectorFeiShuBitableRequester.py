@@ -14,7 +14,7 @@ class FTCodeDetectorFeiShuBitableRequester(FTCodeDetectorFeiShuRequester):
     def __init__(self, app_id: str, app_secret: str):
         super().__init__(app_id, app_secret)
 
-    def list_fields(self, file: FTCodeDetectorFeiShuBitableFile) -> [str]:
+    def list_fields(self, file: FTCodeDetectorFeiShuBitableFile) -> [FTCodeDetectorFeiShuBitableField]:
         request: ListAppTableFieldRequest = ListAppTableFieldRequest.builder() \
             .app_token(file.token) \
             .table_id(file.table_id) \
@@ -33,7 +33,7 @@ class FTCodeDetectorFeiShuBitableRequester(FTCodeDetectorFeiShuRequester):
 
         items = []
         for item in response.data.items:
-            items.append(item.field_id)
+            items.append(FTCodeDetectorFeiShuBitableField(item.field_name, item.type))
 
         return items
 
@@ -78,11 +78,11 @@ class FTCodeDetectorFeiShuBitableRequester(FTCodeDetectorFeiShuRequester):
         return 
         
     def update_field(self, title: str, type: int, index: int, file: FTCodeDetectorFeiShuBitableFile):
-        field_ids = self.list_fields()
-        if len(field_ids) <= 0:
+        fields: [FTCodeDetectorFeiShuBitableField] = self.list_fields()
+        if len(fields) <= 0 or index >= len(fields):
             return
 
-        field_id = field_ids[index]
+        field_id = fields[index].field_id
         
         request: UpdateAppTableFieldRequest = UpdateAppTableFieldRequest.builder() \
             .app_token(file.token) \
@@ -127,12 +127,25 @@ class FTCodeDetectorFeiShuBitableRequester(FTCodeDetectorFeiShuRequester):
         # 处理业务结果
         lark.logger.info(lark.JSON.marshal(response.data, indent=4))
 
-    def create_fields(self, fields: [FTCodeDetectorFeiShuBitableField]):
+    def create_fields_if_needed(self, file: FTCodeDetectorFeiShuBitableFile, fields: [FTCodeDetectorFeiShuBitableField]):
+        if file == None or fields == None or len(fields) <= 0:
+            return
+        
+        all_fields = self.list_fields(file)
+        fields_need_create: [FTCodeDetectorFeiShuBitableField] = []
+
+        for field in fields:
+            if field not in all_fields:
+                fields_need_create.append(field)
+        
+        self.create_fields(file, fields_need_create)
+
+    def create_fields(self, file: FTCodeDetectorFeiShuBitableFile, fields: [FTCodeDetectorFeiShuBitableField]):
         if fields == None or len(fields) <= 0:
             return
         
         for field in fields:
-            self.create_field(field)
+            self.create_field(file, field)
 
     def write(self, file: FTCodeDetectorFeiShuBitableFile, records: [AppTableRecord]):
         if records == None or len(records) <= 0:
