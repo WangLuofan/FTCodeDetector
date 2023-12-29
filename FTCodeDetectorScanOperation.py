@@ -13,7 +13,7 @@ from FTCodeDetectorFileManager import FTCodeDetectorFileManager
 from FTCodeDetectorModelStack import FTCodeDetectorModelStack
 
 class FTCodeDetectorScanOperation(threading.Thread):
-    def __init__(self, files: [str], thread_lock: threading.Lock, result: dict):
+    def __init__(self, files: [str], thread_lock: threading.Lock, result: [FTCodeDetectorModel]):
         threading.Thread.__init__(self)
         self.result = result
         self.files = files
@@ -58,6 +58,9 @@ class FTCodeDetectorScanOperation(threading.Thread):
                                 stack.pop()
 
                             stack.top().end_line = l + 1
+                            if stack.top().business_marco == None:
+                                stack.top().business_marco = self.add_marco((FTCodeDetectorConst.BUSINESS_MARCO, None, FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN), FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN_DESC)
+
                             model_list.append(stack.top())
 
                             stack.pop()
@@ -89,6 +92,9 @@ class FTCodeDetectorScanOperation(threading.Thread):
                             comment_end_line = lines[l + 1]
                             stack.top().end_line = l + 1
                             stack.top().source_lines.append((l + 1, comment_end_line))
+
+                        if stack.top().business_marco == None:
+                            stack.top().business_marco = self.add_marco((FTCodeDetectorConst.BUSINESS_MARCO, None, FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN), FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN_DESC)
                         
                         stack.pop()
                         state = False
@@ -99,11 +105,8 @@ class FTCodeDetectorScanOperation(threading.Thread):
 
                         marco: FTCodeDetectorMarco = self.add_marco(groups)
                         marco.update_type(FTCodeDetectorConst.FEILD_TYPE_SINGLE)
-
-                        model.business_type = groups[2]
-                        model.business_desc = marco.get_desc()
-
-                        model.user_defined.append(marco)
+                        
+                        model.business_marco = marco
 
                 else:
                     if stack.empty() == False:
@@ -111,31 +114,10 @@ class FTCodeDetectorScanOperation(threading.Thread):
                         marco = self.add_marco(groups)
                         model.user_defined.append(marco)
 
-            self.category(model_list)
-
-    def category(self, models: [FTCodeDetectorModel]):
-        if models == None or len(models) <= 0:
-            return
-
-        model_dict: dict = {}
-        business_dict: dict = {}
-
-        for model in models:
-            if model.business_type not in model_dict:
-                model_dict[model.business_type] = []
-
-            model_dict[model.business_type].append(model)
-            business_dict[model.business_type] = model.business_desc
-
-        self.thread_lock.acquire(True)
-
-        for (business_type, models) in model_dict.items():
-            self.result[business_type] = FTCodeDetectorBusinessModel(business_type, business_dict[business_type], models)
-
-        del model_dict
-        del business_dict
-
-        self.thread_lock.release()
+            if len(model_list) > 0:
+                self.thread_lock.acquire(True)
+                self.result.extend(model_list)
+                self.thread_lock.release()
 
     def __read_file_contents(self, file: str):
         if not os.path.exists(file):

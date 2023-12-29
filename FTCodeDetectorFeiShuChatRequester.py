@@ -55,6 +55,7 @@ class FTCodeDetectorFeiShuChatRequester(FTCodeDetectorFeiShuRequester):
             result: bool = True
             for chat_id in chat_ids:
                 result = result and self.send_message_(chat_id, payload)
+
             if result == False:
                 lark.logger.info('消息发送失败')
 
@@ -63,45 +64,6 @@ class FTCodeDetectorFeiShuChatRequester(FTCodeDetectorFeiShuRequester):
             return result
     
     def send_message_(self, chat_id: FTCodeDetectorFeiShuChatID, payload: dict) -> bool:
-
-        # extensions = ''
-        # for (index, ext) in enumerate(file_manager.extensions):
-        #     if index != 0:
-        #         extensions = extensions + '|'
-        #     extensions += ext
-
-        # url = 'https://futu.feishu.cn/base/{bitable_token}?table={table_id}&view={bitable_view_id}'.format(bitable_token = file_app_token, table_id = table_id, bitable_view_id = bitable_view_id)
-        # if export_type == 'spreadsheets':
-        #     url = 'https://futu.feishu.cn/sheets/{spread_sheet_id}?from=from_copylink'.format(spread_sheet_id = spread_sheet_id)
-
-        # scan_result = []
-
-        # item_count = min(3, len(result))
-        # for idx in range(0, item_count):
-        #     outdate = result[idx]
-
-        #     filename = FTCodeDetectorFileManager.get_file_name(outdate.source_file)
-        #     scan_result.append({
-        #                     'scan_result_file': filename,
-        #                     'scan_line_result': '{start} ~ {end}'.format(start = outdate.start_line + 1, end = outdate.end_line + 1),
-        #                 })
-
-        # ctime = datetime.now()
-        # payload = {
-        #     'type': 'template',
-        #     'data': {
-        #         'template_id': message_card_id,
-        #         'template_variable': {
-        #             'scan_date_time': '{year}-{month}-{day} {hour}:{minute}:{second}' \
-        #                 .format(year = '%04d' % ctime.year, month = '%02d' % ctime.month, day = '%02d' % ctime.day, hour = '%02d' % ctime.hour, minute = '%02d' % ctime.minute, second = '%02d' % ctime.second),
-        #             'scan_project_directory': file_manager.path,
-        #             'scan_file_ext': extensions,
-        #             'outdated_count': str(len(result)),
-        #             'scan_result': scan_result,
-        #             'scan_result_sheets_url': url
-        #         }
-        #     }
-        # }
 
         if payload == None or len(payload) <= 0:
             return

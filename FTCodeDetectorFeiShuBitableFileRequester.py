@@ -14,10 +14,10 @@ class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester
     def __init__(self, app_id: str, app_secret: str):
         super().__init__(app_id, app_secret)
 
-    def list_fields(self, file: FTCodeDetectorFeiShuBitableFile) -> [FTCodeDetectorFeiShuBitableField]:
+    def list_fields(self, file: FTCodeDetectorFeiShuBitableFile, table_id: str) -> [FTCodeDetectorFeiShuBitableField]:
         request: ListAppTableFieldRequest = ListAppTableFieldRequest.builder() \
             .app_token(file.token) \
-            .table_id(file.table_id) \
+            .table_id(table_id) \
             .build()
         
         response: ListAppTableFieldResponse = self.client.bitable.v1.app_table_field.list(request, self.option)
@@ -37,33 +37,48 @@ class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester
 
         return items
 
-    def list_records(self, file: FTCodeDetectorFeiShuBitableFile) -> [str]:
-        url = 'https://open.feishu.cn/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records'.format(app_token = file.token, table_id = file.table_id)
+    def list_records(self, file: FTCodeDetectorFeiShuBitableFile, table_id: str, page_token: str = '') -> [FTCodeDetectorFeiShuBitableRecord]:
 
-        resp = FTCodeDetectorHttpRequester.GET(url, self.request_headers())
-        if resp == None or (resp.status_code != 200 and resp.code != 0):
-            return None
+        request: ListAppTableRecordRequest = ListAppTableRecordRequest.builder() \
+            .app_token(file.token) \
+            .table_id(table_id) \
+            .page_token(page_token) \
+            .build()
         
-        record_ids: [str] = []
+        response: ListAppTableRecordResponse = self.client.bitable.v1.app_table_record.list(request)
 
-        if 'items' in resp.data:
-            for item in resp.data['items']:
-                if 'record_id' in item:
-                    record_ids.append(item['record_id'])
+        # 处理失败返回
+        if not response.success():
+            lark.logger.error(
+                f"client.bitable.v1.app_table_record.list failed, code: {response.code}, msg: {response.msg}, log_id: {response.get_log_id()}")
+            return None
 
-        return record_ids
+        # 处理业务结果
+        lark.logger.info(lark.JSON.marshal(response.data, indent=4))
+        
+        records: [FTCodeDetectorFeiShuBitableRecord] = []
+        if response.data.items == None:
+            return records
 
-    def clear_records(self, file: FTCodeDetectorFeiShuBitableFile):
-        record_ids = self.list_records(file)
-        if len(record_ids) <= 0:
+        for item in response.data.items:
+            records.append(FTCodeDetectorFeiShuBitableRecord(item))
+        
+        if response.data.has_more == True and response.data.page_token != None:
+            records.extend(self.list_records(file, table_id))
+
+        return records
+
+    def clear_records(self, file: FTCodeDetectorFeiShuBitableFile, table_id: str):
+        records: [FTCodeDetectorFeiShuBitableRecord] = self.list_records(file, table_id)
+        if len(records) <= 0:
             return
 
         request: BatchDeleteAppTableRecordRequest = BatchDeleteAppTableRecordRequest.builder() \
             .app_token(file.token) \
-            .table_id(file.table_id) \
+            .table_id(table_id) \
             .request_body(BatchDeleteAppTableRecordRequestBody \
                           .builder() \
-                          .records(record_ids) \
+                          .records([record.record_id for record in records]) \
                           .build()) \
             .build()
         
@@ -76,40 +91,12 @@ class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester
 
         lark.logger.info(lark.JSON.marshal(response.data, indent=4))
         return 
-        
-    def update_field(self, title: str, type: int, index: int, file: FTCodeDetectorFeiShuBitableFile):
-        fields: [FTCodeDetectorFeiShuBitableField] = self.list_fields()
-        if len(fields) <= 0 or index >= len(fields):
-            return
 
-        field_id = fields[index].field_id
-        
-        request: UpdateAppTableFieldRequest = UpdateAppTableFieldRequest.builder() \
-            .app_token(file.token) \
-            .table_id(file.table_id) \
-            .request_body(AppTableField.builder()
-                          .field_id(field_id) \
-                            .field_name(title)
-                            .type(type)
-                            .build()) \
-                        .build()
-        
-        response: UpdateAppTableFieldResponse = self.client.bitable.v1.app_table_field.update(request, self.option)
-
-        # 处理失败返回
-        if not response.success():
-            lark.logger.error(
-                f"client.bitable.v1.app_table_field.update failed, code: {response.code}, msg: {response.msg}, log_id: {response.get_log_id()}")
-            return
-
-        # 处理业务结果
-        lark.logger.info(lark.JSON.marshal(response.data, indent=4))
-    
-    def create_field(self, file: FTCodeDetectorFeiShuBitableFile, field: FTCodeDetectorFeiShuBitableField):
+    def create_field(self, file: FTCodeDetectorFeiShuBitableFile, table_id: str, field: FTCodeDetectorFeiShuBitableField):
 
         request: CreateAppTableFieldRequest = CreateAppTableFieldRequest.builder() \
             .app_token(file.token) \
-            .table_id(file.table_id) \
+            .table_id(table_id) \
             .request_body(AppTableField.builder()
                           .field_name(field.field_title)
                           .type(field.get_field_type())
@@ -128,36 +115,36 @@ class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester
         # 处理业务结果
         lark.logger.info(lark.JSON.marshal(response.data, indent=4))
 
-    def create_fields_if_needed(self, file: FTCodeDetectorFeiShuBitableFile, fields: [FTCodeDetectorFeiShuBitableField]):
+    def create_fields_if_needed(self, file: FTCodeDetectorFeiShuBitableFile, table_id: str, fields: [FTCodeDetectorFeiShuBitableField]):
         if file == None or fields == None or len(fields) <= 0:
             return
         
-        all_fields = self.list_fields(file)
-        fields_need_create: [FTCodeDetectorFeiShuBitableField] = fields if all_fields == None and len(all_fields) > 0 else []
+        all_fields = self.list_fields(file, table_id)
+        fields_need_create: [FTCodeDetectorFeiShuBitableField] = fields if all_fields == None or len(all_fields) <= 0 else []
 
         if all_fields != None and len(all_fields) > 0 and len(fields_need_create) <= 0:
             for field in fields:
                 if field not in all_fields:
                     fields_need_create.append(field)
         
-        self.create_fields(file, fields_need_create)
+        self.create_fields(file, table_id, fields_need_create)
 
-    def create_fields(self, file: FTCodeDetectorFeiShuBitableFile, fields: [FTCodeDetectorFeiShuBitableField]):
+    def create_fields(self, file: FTCodeDetectorFeiShuBitableFile, table_id: str, fields: [FTCodeDetectorFeiShuBitableField]):
         if fields == None or len(fields) <= 0:
             return
         
         for field in fields:
-            self.create_field(file, field)
+            self.create_field(file, table_id, field)
 
-    def write(self, file: FTCodeDetectorFeiShuBitableFile, records: [AppTableRecord]) -> bool:
+    def write(self, file: FTCodeDetectorFeiShuBitableFile, table_id: str, records: [AppTableRecord]) -> bool:
         if records == None or len(records) <= 0:
             return
 
-        self.clear_records(file)
+        self.clear_records(file, table_id)
 
         request: BatchCreateAppTableRecordRequest = BatchCreateAppTableRecordRequest.builder() \
             .app_token(file.token) \
-            .table_id(file.table_id) \
+            .table_id(table_id) \
             .user_id_type('user_id') \
             .request_body(BatchCreateAppTableRecordRequestBody.builder() \
                           .records(records) \
@@ -174,7 +161,7 @@ class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester
         lark.logger.info(lark.JSON.marshal(response.data, indent=4))
         return True
 
-    def create_file(self, file_name: str) -> FTCodeDetectorFeiShuBitableFile:
+    def create_file(self, file_name: str) -> (FTCodeDetectorFeiShuBitableFile, str):
         request: CreateAppRequest = CreateAppRequest.builder() \
             .request_body(ReqApp.builder()
                           .name(file_name)
@@ -193,7 +180,7 @@ class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester
         lark.logger.info(lark.JSON.marshal(response.data, indent=4))
         file: FTCodeDetectorFeiShuBitableFile = FTCodeDetectorFeiShuBitableFile(bitable_app = response.data.app)
         
-        return file
+        return (file, response.data.app.default_table_id)
     
     def create_table(self, file: FTCodeDetectorFeiShuBitableFile, table_name: str, fields: [FTCodeDetectorFeiShuBitableField]) -> str:
         if file == None or table_name == None or len(table_name) <= 0:

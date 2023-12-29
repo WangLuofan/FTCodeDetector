@@ -34,7 +34,7 @@ class FTCodeDetectorBusinessConfig():
         if bitable_file == None:
             return
         
-        self.table_id = bitable_file.table_id
+        self.table_id = bitable_file.table_id[self.business_type]
         self.file_url = '%s?table=%s' % (bitable_file.url, bitable_file.table_id)
 
 @FTCodeDetectorSingleton
@@ -68,7 +68,7 @@ class FTCodeDetectorConfig():
         if business_type in self.business:
             return
 
-        business = FTCodeDetectorBusinessConfig(type)
+        business = FTCodeDetectorBusinessConfig(business_type)
         self.business[business_type] = business
 
         return business
@@ -108,7 +108,7 @@ class FTCodeDetectorConfig():
             self.chat_group = contents['chat_group']
 
         if 'file_manager' in contents:
-            self.file_manager = contents['chat_group'].split(',')
+            self.file_manager = contents['file_manager']
 
         if 'business' in contents:
             for (business_type, item) in contents['business'].items():
@@ -123,14 +123,19 @@ class FTCodeDetectorConfig():
             'ftoa_app_key': self.FTOA_APP_KEY,
             'ftoa_app_sec': self.FTOA_APP_SEC,
             'platform': self.platform if self.platform != None else 'Unknown',
-            'file_name': self.file_name
         }
+
+        if self.file_name != None:
+            contents['file_name'] = self.file_name
 
         if self.file_token != None:
             contents['file_token'] = self.file_token
 
         if self.file_url != None:
             contents['file_url'] = self.file_url
+
+        if self.file_manager != None and len(self.file_manager) > 0:
+            contents['file_manager'] = self.file_manager
 
         business = {}
         for (business_type, item) in self.business.items():

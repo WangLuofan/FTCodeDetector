@@ -7,7 +7,10 @@
     "file_url": "https://futu.feishu.cn/base/DlRQb3VtAa23WYs1rFBc4jLrnSh?table=tbl127kaInJWmMLL&view=vewsGfgDzI",
     "platform": "iOS",
     "chat_group": "机器人测试群",
-    "file_manager": "cairowang,bruceli",
+    "file_manager": [
+        "cairowang",
+        "bruceli"
+     ],
     "business": {
         "expire" : {
             "message_card_id": "ctp_AAyuu48Zmctz",

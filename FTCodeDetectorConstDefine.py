@@ -11,6 +11,12 @@ FTCodeDetectorConst.SOURCE_LINE_DESC = '所在行数'
 FTCodeDetectorConst.PLATFORM_DESC = '所属平台'
 FTCodeDetectorConst.BUSINESS_DESC = '所属业务'
 
+FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN = 'Unknown'
+FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN_DESC = '未知业务'
+
+FTCodeDetectorConst.SUMMARY_BUSINESS_TYPE = 'Summary'
+FTCodeDetectorConst.SUMMARY_TABLE_NAME = '汇总信息'
+
 FTCodeDetectorConst.FIELD_TYPE_TEXT = 'text'
 FTCodeDetectorConst.FIELD_TYPE_DATETIME = 'datetime'
 FTCodeDetectorConst.FEILD_TYPE_SINGLE = 'single'

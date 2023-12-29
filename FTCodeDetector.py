@@ -20,8 +20,6 @@ from FTCodeDetectorFileManager import FTCodeDetectorFileManager
 from FTCodeDetectorFeiShuChatRequester import FTCodeDetectorFeiShuChatRequester
 from FTCodeDetectorFeiShuBitableFileRequester import FTCodeDetectorFeiShuBitableFileRequester
 
-result = {}
-
 class FTCodeDetector():
     def __init__(self):
         self.ext = ['.h', '.hpp', '.c', '.cxx', '.cpp', '.cc', '.m', '.mm', '.swift']
@@ -59,13 +57,15 @@ class FTCodeDetector():
                 
         return True
 
-    def run(self):
+    def run(self) -> dict:
 
         if self.parse_arg() == False:
             return
 
         if len(self.directory) == 0 or len(self.ext) == 0:
             return
+        
+        result: [FTCodeDetectorModel] = []
         
         file_manager = FTCodeDetectorFileManager(self.directory, self.ext)
         source_files = file_manager.get_source_files()
@@ -89,7 +89,10 @@ class FTCodeDetector():
             t.start()
             t.join()
 
-        return self.feishu()
+        business_dict = self.do_categorize(result)
+        self.feishu(business_dict)
+
+        return business_dict
     
     def file_exists(self, files: dict, token: str) -> FTCodeDetectorFeiShuBitableFile:
         if token == None or len(token) <= 0:
@@ -100,68 +103,85 @@ class FTCodeDetector():
                 return file
         return None
     
-    def get_all_fields(self, models) -> [FTCodeDetectorFeiShuBitableField]:
+    def get_all_fields(self, business_model) -> [FTCodeDetectorFeiShuBitableField]:
         fields: [FTCodeDetectorFeiShuBitableField] = []
         fields_dic: dict = {}
 
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.FILE_DESC, FTCodeDetectorConst.FIELD_TYPE_TEXT))
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.SOURCE_LINE_DESC, FTCodeDetectorConst.FIELD_TYPE_TEXT))
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.PLATFORM_DESC, FTCodeDetectorConst.FEILD_TYPE_SINGLE))
+        fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.BUSINESS_DESC, FTCodeDetectorConst.FEILD_TYPE_SINGLE))
 
-        for model in models:
-            for marco in model.user_defined:
-                if marco.tag in fields_dic:
-                    continue
+        if business_model.business_type != FTCodeDetectorConst.SUMMARY_BUSINESS_TYPE:
+            for model in business_model.models:
+                for marco in model.user_defined:
+                    if marco.tag in fields_dic:
+                        continue
 
-                field: FTCodeDetectorFeiShuBitableField = FTCodeDetectorFeiShuBitableField(marco.get_desc() 
-                                                                                           if marco.tag != FTCodeDetectorConst.BUSINESS_MARCO \
-                                                                                            else FTCodeDetectorConst.BUSINESS_DESC, \
-                                                                                            marco.get_type())
-                fields.append(field)
+                    field: FTCodeDetectorFeiShuBitableField = FTCodeDetectorFeiShuBitableField(marco.get_desc(), marco.get_type())
+                    fields.append(field)
 
-                fields_dic[marco.tag] = field
+                    fields_dic[marco.tag] = field
 
         del fields_dic
         return fields
 
-    def write_file(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester, file: FTCodeDetectorFeiShuBitableFile, models: [FTCodeDetectorModel]) -> bool:
+    def is_manager(self, nick: str) -> bool:
+        for manager in FTCodeDetectorConfig.file_manager:
+            if nick.lower() == manager.lower():
+                return True
+        return False
+
+    def write(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester, file: FTCodeDetectorFeiShuBitableFile, business_model: FTCodeDetectorBusinessModel) -> bool:
         records: [AppTableRecord] = []
-        for model in models:
+        for model in business_model.models:
             fields = {
                 FTCodeDetectorConst.FILE_DESC: FTCodeDetectorFileManager.get_file_name(model.source_file),
                 FTCodeDetectorConst.SOURCE_LINE_DESC: '{start} ~ {end}'.format(start = model.start_line + 1, end = model.end_line + 1),
-                FTCodeDetectorConst.PLATFORM_DESC: FTCodeDetectorConfig.platform
+                FTCodeDetectorConst.PLATFORM_DESC: FTCodeDetectorConfig.platform,
+                FTCodeDetectorConst.BUSINESS_DESC: model.business_marco.value
             }
 
-            for marco in model.user_defined:
-                if marco.tag == FTCodeDetectorConst.BUSINESS_MARCO:
-                    fields[FTCodeDetectorConst.BUSINESS_DESC] = marco.value
-                elif 'type' in marco.attributes:
-                    if marco.attributes['type'] == FTCodeDetectorConst.FIELD_TYPE_DATETIME:
-                        try:
-                            date = datetime.strptime(marco.value, r'%Y/%m/%d')
-                        except ValueError:
-                            ctime = datetime.now()
-                            date = datetime.strptime('{year}/{month}/{day}'.format(year = ctime.year, month = ctime.month, day = ctime.day), r'%Y/%m/%d')
+            if business_model.business_type != FTCodeDetectorConst.SUMMARY_BUSINESS_TYPE:
+                for marco in model.user_defined:
+                    if marco.tag == FTCodeDetectorConst.BUSINESS_MARCO:
+                        fields[FTCodeDetectorConst.BUSINESS_DESC] = marco.value
+                    elif 'type' in marco.attributes:
+                        if marco.attributes['type'] == FTCodeDetectorConst.FIELD_TYPE_DATETIME:
+                            try:
+                                date = datetime.strptime(marco.value, r'%Y/%m/%d')
+                            except ValueError:
+                                ctime = datetime.now()
+                                date = datetime.strptime('{year}/{month}/{day}'.format(year = ctime.year, month = ctime.month, day = ctime.day), r'%Y/%m/%d')
 
-                        fields[marco.attributes['desc']] = int(date.timestamp() * 1000)
-                    elif marco.attributes['type'] == FTCodeDetectorConst.FIELD_TYPE_PERSON:
-                        feiShuRequester.add_member_perm(marco.value, file, FTCodeDetectorConst.FILE_PERM_VIEW)
+                            fields[marco.attributes['desc']] = int(date.timestamp() * 1000)
+                        elif marco.attributes['type'] == FTCodeDetectorConst.FIELD_TYPE_PERSON:
+                            if self.is_manager(marco.value) == False:
+                                feiShuRequester.add_member_perm(marco.value, file, FTCodeDetectorConst.FILE_PERM_VIEW)
 
-                        user_info = FTCodeDetectorFtoaRequester.get_user_info(marco.value)
-                        if user_info != None and 'feishuId' in user_info:
-                                fields[marco.attributes['desc']] = [{
-                                    'id': user_info['feishuId']
-                                }]
+                            user_info = FTCodeDetectorFtoaRequester.get_user_info(marco.value)
+                            if user_info != None and 'feishuId' in user_info:
+                                    fields[marco.attributes['desc']] = [{
+                                        'id': user_info['feishuId']
+                                    }]
+                            else:
+                                user_info = '<at email={principal}@futunn.com>{principal}</at>'.format(principal = model.value)
+                                fields[marco.attributes['desc']] = user_info
+                        elif marco.attributes['type'] == FTCodeDetectorConst.FIELD_TYPE_CHECKBOX:
+                            if marco.value.lower() == 'true':
+                                fields[marco.attributes['desc']] = True
+                            else:
+                                fields[marco.attributes['desc']] = False
                         else:
-                            user_info = '<at email={principal}@futunn.com>{principal}</at>'.format(principal = model.value)
-                            fields[marco.attributes['desc']] = user_info
-                    else:
-                        fields[marco.attributes['desc']] = marco.value
+                            fields[marco.attributes['desc']] = marco.value
             
             records.append(AppTableRecord.builder().fields(fields).build())
 
-        return feiShuRequester.write(file, records)
+        return feiShuRequester.write(file, file.table_id[business_model.business_type], records)
+    
+    def add_manager_perm(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester, file: FTCodeDetectorFeiShuBitableFile):
+        for manager in FTCodeDetectorConfig.file_manager:
+            feiShuRequester.add_member_perm(manager, file, FTCodeDetectorConst.FILE_PERM_EDIT)
 
     def update_config(self, file: FTCodeDetectorFeiShuFile, business_type: str):
         if file == None:
@@ -173,57 +193,110 @@ class FTCodeDetector():
         FTCodeDetectorConfig.file_url = file.url
         FTCodeDetectorConfig.file_token = file.token
 
-    def update_and_write(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester) -> bool:
-        for (business_type, business_model) in result.items():
+    def create_file(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester) -> (FTCodeDetectorFeiShuBitableFile, str):
+        (file, default_table_id) = feiShuRequester.create_file(FTCodeDetectorConfig.file_name)
+
+        if file == None:
+            return None
+        
+        self.add_manager_perm(feiShuRequester, file)
+        
+        return (file, default_table_id)
+
+    def create_file_or_table_if_needed(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester, business_dict: dict) -> FTCodeDetectorFeiShuBitableFile:
+        all_files = feiShuRequester.list_files()
+        for (business_type, business_model) in business_dict.items():
             business_config = FTCodeDetectorConfig.get_business(business_type)
 
-            all_fields = self.get_all_fields(business_model.models)
-            file: FTCodeDetectorFeiShuBitableFile = self.file_exists(feiShuRequester.list_files(), FTCodeDetectorConfig.file_token)
-            if file == None:
-                file = feiShuRequester.create_file(FTCodeDetectorConfig.file_name)
-                if file == None:
-                    return False
-                
-                default_table_id = file.table_id
-                file.table_id = feiShuRequester.create_table(file, business_model.business_desc, all_fields)
+            all_fields: [FTCodeDetectorFeiShuBitableField] = self.get_all_fields(business_model)
+            file: FTCodeDetectorFeiShuBitableFile = self.file_exists(all_files, FTCodeDetectorConfig.file_token)
 
+            if file == None:
+                (file, default_table_id) = self.create_file(feiShuRequester)
+                all_files[file.token] = file
+
+                file.table_id[business_type] = feiShuRequester.create_table(file, business_model.business_desc, all_fields)
                 feiShuRequester.delete_table(file.token, default_table_id)
 
                 self.update_config(file, business_type)
             elif business_config.table_id == None:
-                file.table_id = feiShuRequester.create_table(file, business_model.business_desc, all_fields)
+                file.table_id[business_type] = feiShuRequester.create_table(file, business_model.business_desc, all_fields)
                 business_config.update(file)
             else:
                 file.update(business_config)
-                feiShuRequester.create_fields_if_needed(file, all_fields)
-            
-            return self.write_file(feiShuRequester, file, business_model.models)
+                feiShuRequester.create_fields_if_needed(file, file.table_id[business_type], all_fields)
+        
+        return file
 
-    def send_message(self):
+    def send_message(self, business_dict: dict):
+        extensions = ''
+        for (index, ext) in enumerate(self.ext):
+            if index != 0:
+                extensions = extensions + '|'
+            extensions += ext
+
+        url = 'https://futu.feishu.cn/base/{bitable_token}'.format(bitable_token = FTCodeDetectorConfig.file_token)
+
+        scan_result = []
+
+        item_count = min(3, len(business_dict))
+        models: [FTCodeDetectorModel] = business_dict[FTCodeDetectorConst.SUMMARY_BUSINESS_TYPE].models
+
+        for idx in (0, item_count):
+            model = models[idx]
+
+            filename = FTCodeDetectorFileManager.get_file_name(model.source_file)
+            scan_result.append({
+                            'scan_result_file': filename,
+                            'scan_line_result': '{start} ~ {end}'.format(start = model.start_line + 1, end = model.end_line + 1),
+                        })
+
+        ctime = datetime.now()
+        payload = {
+            'type': 'template',
+            'data': {
+                'template_id': 'ctp_AAyuu48Zmctz',
+                'template_variable': {
+                    'scan_date_time': '{year}-{month}-{day} {hour}:{minute}:{second}' \
+                        .format(year = '%04d' % ctime.year, month = '%02d' % ctime.month, day = '%02d' % ctime.day, hour = '%02d' % ctime.hour, minute = '%02d' % ctime.minute, second = '%02d' % ctime.second),
+                    'scan_project_directory': self.directory,
+                    'scan_file_ext': extensions,
+                    'outdated_count': str(len(models)),
+                    'scan_result': scan_result,
+                    'scan_result_sheets_url': url
+                }
+            }
+        }
+
         chatRequester: FTCodeDetectorFeiShuChatRequester = FTCodeDetectorFeiShuChatRequester(FTCodeDetectorConfig.FEISHU_APP_ID, FTCodeDetectorConfig.FEISHU_APP_SECRET)
-        chatRequester.send_message('机器人测试')
+        chatRequester.send_message('机器人测试', payload)
 
-    def feishu(self) -> bool:
+    def feishu(self, business_dict: dict) -> bool:
 
-        if len(result) <= 0:
+        if len(business_dict) <= 0:
             return True
         
         feiShuRequester = FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorConfig.FEISHU_APP_ID, FTCodeDetectorConfig.FEISHU_APP_SECRET)
-        feiShuRequester.delete_all_files()
-        # if self.update_and_write(feiShuRequester):
-        self.send_message()
+
+        file: FTCodeDetectorFeiShuBitableFile = self.create_file_or_table_if_needed(feiShuRequester, business_dict)
+        if file == None:
+            return False
         
+        for (_, business_model) in business_dict.items():
+            self.write(feiShuRequester, file, business_model)
+
+        self.send_message(business_dict)
         return True
 
-    def print(self):
-        if len(result) <= 0:
+    def print(self, business_dict: dict):
+        if len(business_dict) <= 0:
             return 
         
-        print('Total Record Count: ', len(result))
+        print('Total Record Count: ', len(business_dict))
         print()
 
-        for (_, business_model) in result.items():
-            print('business: %s', business_model.business_desc)
+        for (_, business_model) in business_dict.items():
+            print('business: %s' % business_model.business_desc)
             for model in business_model.models:
                 print('    *******************************')
 
@@ -248,13 +321,22 @@ class FTCodeDetector():
             
             print('    *******************************')
             print()
-            
+
+    def do_categorize(self, result: [FTCodeDetectorModel]) -> dict:
+        business_dict: dict = {}
+
+        for item in result:
+            if item.business_marco.value not in business_dict:
+                business_dict[item.business_marco.value] = FTCodeDetectorBusinessModel(item.business_marco.value, item.business_marco.attributes['desc'])
+
+            business_dict[item.business_marco.value].append_model(item)
+
+        business_dict[FTCodeDetectorConst.SUMMARY_BUSINESS_TYPE] = FTCodeDetectorBusinessModel(FTCodeDetectorConst.SUMMARY_BUSINESS_TYPE, FTCodeDetectorConst.SUMMARY_TABLE_NAME, result)
+        return business_dict
+
 
 if __name__ == '__main__':
     codeDetector: FTCodeDetector = FTCodeDetector()
 
-    if codeDetector.run():
-        codeDetector.print()
-
-    del result
-    # FTCodeDetectorConfig.save_config()
+    codeDetector.print(codeDetector.run())
+    FTCodeDetectorConfig.save_config()

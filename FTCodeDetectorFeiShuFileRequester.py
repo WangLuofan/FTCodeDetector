@@ -75,8 +75,11 @@ class FTCodeDetectorFeiShuFileRequester(FTCodeDetectorFeiShuRequester):
         lark.logger.info(lark.JSON.marshal(response.data, indent = 4))
         return True
 
-    def list_files(self) -> dict:
-        request: ListFileRequest = ListFileRequest.builder().build()
+    def list_files(self, next_page_token: str = '') -> dict:
+        request: ListFileRequest = ListFileRequest.builder() \
+            .page_token(next_page_token) \
+            .build()
+        
         response: ListFileResponse = self.client.drive.v1.file.list(request, self.option)
 
         if not response.success():
@@ -90,5 +93,8 @@ class FTCodeDetectorFeiShuFileRequester(FTCodeDetectorFeiShuRequester):
         for f in response.data.files:
             file = FTCodeDetectorFeiShuBitableFile(f)
             files[file.token] = file
+
+        if response.data.has_more == True and response.data.next_page_token != None:
+            files.update(self.list_files(response.data.next_page_token))
 
         return files

@@ -44,6 +44,23 @@ class FTCodeDetectorFeiShuFile():
         if business_config.file_url != None:
             self.url = business_config.file_url
 
+class FTCodeDetectorFeiShuBitableRecord():
+    def __init__(self, record: lark_oapi.bitable.v1.model.AppTableRecord):
+        if record.record_id != None:
+            self.record_id = record.record_id
+
+        if record.created_by != None:
+            self.created_by = record.created_by.name
+
+        if record.created_time != None:
+            self.created_time = record.created_time
+
+        if record.last_modified_by != None:
+            self.last_modified_by = record.last_modified_by.name
+
+        if record.last_modified_time != None:
+            self.last_modified_time = record.last_modified_time
+
 class FTCodeDetectorFeiShuBitableField():
     def __init__(self, title: str, type: str) -> None:
         self.field_title = title
@@ -89,13 +106,12 @@ class FTCodeDetectorFeiShuBitableField():
 class FTCodeDetectorFeiShuBitableFile(FTCodeDetectorFeiShuFile):
     def __init__(self, file: File = None, bitable_app: App = None):
         super().__init__(file)
-        self.table_id = None
+        self.table_id = {}
 
         if bitable_app != None:
             self.token = bitable_app.app_token
             self.name = bitable_app.name
             self.url = bitable_app.url
-            self.table_id = bitable_app.default_table_id
             self.type = 'bitable'
 
     def update(self, business_config):
@@ -105,4 +121,4 @@ class FTCodeDetectorFeiShuBitableFile(FTCodeDetectorFeiShuFile):
         super().update(business_config)
         
         if business_config.table_id != None:
-            self.table_id = business_config.table_id
+            self.table_id[business_config.business_type] = business_config.table_id
