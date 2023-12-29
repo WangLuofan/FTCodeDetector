@@ -14,6 +14,8 @@ FTCodeDetectorConst.BUSINESS_DESC = '所属业务'
 FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN = 'Unknown'
 FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN_DESC = '未知业务'
 
+FTCodeDetectorConst.UPDATER_DESC = '更新人'
+
 FTCodeDetectorConst.SUMMARY_BUSINESS_TYPE = 'Summary'
 FTCodeDetectorConst.SUMMARY_TABLE_NAME = '汇总信息'
 
@@ -36,5 +38,6 @@ FTCodeDetectorConst.FILE_PERM_FULLACCESS = 'full_access'
 FTCodeDetectorConst.COMMENT_BEGIN = r'/**'
 FTCodeDetectorConst.START_MARCO = r'FT_FINANCIAL_CODE_MARK_BEGIN'
 FTCodeDetectorConst.BUSINESS_MARCO = r'business'
+FTCodeDetectorConst.UPDATER_MARCO = r'updater'
 FTCodeDetectorConst.END_MARCO = r'FT_FINANCIAL_CODE_MARK_END'
 FTCodeDetectorConst.COMMENT_END = r'*/'

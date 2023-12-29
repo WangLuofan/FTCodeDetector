@@ -108,6 +108,15 @@ class FTCodeDetectorScanOperation(threading.Thread):
                         
                         model.business_marco = marco
 
+                elif groups[0] == FTCodeDetectorConst.UPDATER_MARCO:
+                    if stack.empty() == False:
+                        stack.top().source_lines.append((l, lines[l]))
+
+                        marco: FTCodeDetectorMarco = self.add_marco(groups)
+                        marco.update_type(FTCodeDetectorConst.FIELD_TYPE_PERSON)
+
+                        model.updater_marco = marco
+
                 else:
                     if stack.empty() == False:
                         stack.top().source_lines.append((l, lines[l]))

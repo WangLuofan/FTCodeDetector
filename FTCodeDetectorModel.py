@@ -71,6 +71,7 @@ class FTCodeDetectorModel():
         self.start_line = -1
         self.end_line = -1
         self.business_marco = None
+        self.updater_marco = None
         self.source_file = None
         self.source_lines = []
         

@@ -5,32 +5,33 @@
    "ftoa_app_sec": "2c0cbab50583a1c777eebe1c61124417",
    "platform": "iOS",
    "file_name": "\u4e1a\u52a1\u4ee3\u7801\u626b\u63cf",
-   "file_token": "IuLmbDrqAaZE62smSXJc8dhrnFh",
-   "file_url": "https://futu.feishu.cn/base/IuLmbDrqAaZE62smSXJc8dhrnFh",
+   "file_token": "CwVwbi7rWaD2OXsSxRVcRRZTnkg",
+   "file_url": "https://futu.feishu.cn/base/CwVwbi7rWaD2OXsSxRVcRRZTnkg",
    "file_manager": [
       "cairowang",
       "bruceli"
    ],
+   "message_card_id": "ctp_AAyuu48Zmctz",
    "business": {
       "refactor": {
-         "table_id": "tblwN3tTo37g0lxt",
-         "file_url": "https://futu.feishu.cn/base/IuLmbDrqAaZE62smSXJc8dhrnFh?table={'refactor': 'tblwN3tTo37g0lxt'}"
+         "table_id": "tblRLCUK4AudnplU",
+         "file_url": "https://futu.feishu.cn/base/CwVwbi7rWaD2OXsSxRVcRRZTnkg?table=tblRLCUK4AudnplU"
       },
       "diff": {
-         "table_id": "tblt34wCFShe0Gw9",
-         "file_url": "https://futu.feishu.cn/base/IuLmbDrqAaZE62smSXJc8dhrnFh?table={'refactor': 'tblwN3tTo37g0lxt', 'diff': 'tblt34wCFShe0Gw9'}"
+         "table_id": "tbl5GIoLIM64EeJg",
+         "file_url": "https://futu.feishu.cn/base/CwVwbi7rWaD2OXsSxRVcRRZTnkg?table=tbl5GIoLIM64EeJg"
       },
       "expire": {
-         "table_id": "tblJvYahQfywmdq2",
-         "file_url": "https://futu.feishu.cn/base/IuLmbDrqAaZE62smSXJc8dhrnFh?table={'refactor': 'tblwN3tTo37g0lxt', 'diff': 'tblt34wCFShe0Gw9', 'expire': 'tblJvYahQfywmdq2'}"
+         "table_id": "tblmd1HsU7pohbmt",
+         "file_url": "https://futu.feishu.cn/base/CwVwbi7rWaD2OXsSxRVcRRZTnkg?table=tblmd1HsU7pohbmt"
       },
       "Unknown": {
-         "table_id": "tblm9vplJWqfkq0P",
-         "file_url": "https://futu.feishu.cn/base/IuLmbDrqAaZE62smSXJc8dhrnFh?table={'refactor': 'tblwN3tTo37g0lxt', 'diff': 'tblt34wCFShe0Gw9', 'expire': 'tblJvYahQfywmdq2', 'Unknown': 'tblm9vplJWqfkq0P'}"
+         "table_id": "tblwzKvzdNFVWD6E",
+         "file_url": "https://futu.feishu.cn/base/CwVwbi7rWaD2OXsSxRVcRRZTnkg?table=tblwzKvzdNFVWD6E"
       },
       "Summary": {
-         "table_id": "tblQVjk3aT5ohJf1",
-         "file_url": "https://futu.feishu.cn/base/IuLmbDrqAaZE62smSXJc8dhrnFh?table={'refactor': 'tblwN3tTo37g0lxt', 'diff': 'tblt34wCFShe0Gw9', 'expire': 'tblJvYahQfywmdq2', 'Unknown': 'tblm9vplJWqfkq0P', 'Summary': 'tblQVjk3aT5ohJf1'}"
+         "table_id": "tblcIxfQnTzSSt4U",
+         "file_url": "https://futu.feishu.cn/base/CwVwbi7rWaD2OXsSxRVcRRZTnkg?table=tblcIxfQnTzSSt4U"
       }
    }
 }

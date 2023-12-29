@@ -15,14 +15,10 @@ class FTCodeDetectorBusinessConfig():
     def __init__(self, type: str, config: dict = None) -> None:
         self.business_type = type
 
-        self.message_card_id = None
         self.table_id = None
         self.file_url = None
 
         if config != None:
-
-            if 'message_card_id' in config:
-                self.message_card_id = config['message_card_id']
 
             if 'table_id' in config:
                 self.table_id = config['table_id']
@@ -35,7 +31,7 @@ class FTCodeDetectorBusinessConfig():
             return
         
         self.table_id = bitable_file.table_id[self.business_type]
-        self.file_url = '%s?table=%s' % (bitable_file.url, bitable_file.table_id)
+        self.file_url = '%s?table=%s' % (bitable_file.url, self.table_id)
 
 @FTCodeDetectorSingleton
 class FTCodeDetectorConfig():
@@ -48,6 +44,7 @@ class FTCodeDetectorConfig():
         self.file_manager = None
         self.chat_group = None
         self.platform = None
+        self.message_card_id = None
         self.file_token = None
         self.file_url = None
         self.file_name = FTCodeDetectorConst.DEFAULT_FILE_NAME
@@ -107,6 +104,9 @@ class FTCodeDetectorConfig():
         if 'chat_group' in contents:
             self.chat_group = contents['chat_group']
 
+        if 'message_card_id' in contents:
+            self.message_card_id = contents['message_card_id']
+
         if 'file_manager' in contents:
             self.file_manager = contents['file_manager']
 
@@ -137,11 +137,13 @@ class FTCodeDetectorConfig():
         if self.file_manager != None and len(self.file_manager) > 0:
             contents['file_manager'] = self.file_manager
 
+        if self.message_card_id != None and len(self.message_card_id) > 0:
+            contents['message_card_id'] = self.message_card_id
+
         business = {}
         for (business_type, item) in self.business.items():
             business_contents = {}
-            if item.message_card_id != None and len(item.message_card_id) > -1:
-                business_contents['message_card_id'] = item.message_card_id
+
             if item.table_id != None and len(item.table_id) > -1:
                 business_contents['table_id'] = item.table_id
             if item.file_url != None and len(item.file_url) > -1:
