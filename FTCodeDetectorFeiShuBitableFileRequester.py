@@ -7,9 +7,9 @@ from lark_oapi.api.bitable.v1 import *
 
 from FTCodeDetectorFeiShuFile import *
 from FTCodeDetectorHttpRequester import FTCodeDetectorHttpRequester
-from FTCodeDetectorFeishuRequester import FTCodeDetectorFeiShuRequester
+from FTCodeDetectorFeiShuFileRequester import FTCodeDetectorFeiShuFileRequester
 
-class FTCodeDetectorFeiShuBitableRequester(FTCodeDetectorFeiShuRequester):
+class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester):
 
     def __init__(self, app_id: str, app_secret: str):
         super().__init__(app_id, app_secret)
@@ -133,11 +133,12 @@ class FTCodeDetectorFeiShuBitableRequester(FTCodeDetectorFeiShuRequester):
             return
         
         all_fields = self.list_fields(file)
-        fields_need_create: [FTCodeDetectorFeiShuBitableField] = fields if all_fields == None else []
+        fields_need_create: [FTCodeDetectorFeiShuBitableField] = fields if all_fields == None and len(all_fields) > 0 else []
 
-        for field in fields:
-            if field not in all_fields:
-                fields_need_create.append(field)
+        if all_fields != None and len(all_fields) > 0 and len(fields_need_create) <= 0:
+            for field in fields:
+                if field not in all_fields:
+                    fields_need_create.append(field)
         
         self.create_fields(file, fields_need_create)
 
@@ -148,7 +149,7 @@ class FTCodeDetectorFeiShuBitableRequester(FTCodeDetectorFeiShuRequester):
         for field in fields:
             self.create_field(file, field)
 
-    def write(self, file: FTCodeDetectorFeiShuBitableFile, records: [AppTableRecord]):
+    def write(self, file: FTCodeDetectorFeiShuBitableFile, records: [AppTableRecord]) -> bool:
         if records == None or len(records) <= 0:
             return
 
@@ -168,9 +169,10 @@ class FTCodeDetectorFeiShuBitableRequester(FTCodeDetectorFeiShuRequester):
         if not response.success():
             lark.logger.error(
                 f"client.bitable.v1.app_table_record.batch_create failed, code: {response.code}, msg: {response.msg}, log_id: {response.get_log_id()}")
-            return
+            return False
 
         lark.logger.info(lark.JSON.marshal(response.data, indent=4))
+        return True
 
     def create_file(self, file_name: str) -> FTCodeDetectorFeiShuBitableFile:
         request: CreateAppRequest = CreateAppRequest.builder() \

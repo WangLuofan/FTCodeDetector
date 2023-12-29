@@ -17,7 +17,8 @@ from FTCodeDetectorFtoaRequester import FTCodeDetectorFtoaRequester
 from FTCodeDetectorFeiShuFile import *
 from FTCodeDetectorScanOperation import FTCodeDetectorScanOperation
 from FTCodeDetectorFileManager import FTCodeDetectorFileManager
-from FTCodeDetectorFeiShuBitableRequester import FTCodeDetectorFeiShuBitableRequester
+from FTCodeDetectorFeiShuChatRequester import FTCodeDetectorFeiShuChatRequester
+from FTCodeDetectorFeiShuBitableFileRequester import FTCodeDetectorFeiShuBitableFileRequester
 
 result = {}
 
@@ -112,7 +113,10 @@ class FTCodeDetector():
                 if marco.tag in fields_dic:
                     continue
 
-                field: FTCodeDetectorFeiShuBitableField = FTCodeDetectorFeiShuBitableField(marco.get_desc(), marco.get_type())
+                field: FTCodeDetectorFeiShuBitableField = FTCodeDetectorFeiShuBitableField(marco.get_desc() 
+                                                                                           if marco.tag != FTCodeDetectorConst.BUSINESS_MARCO \
+                                                                                            else FTCodeDetectorConst.BUSINESS_DESC, \
+                                                                                            marco.get_type())
                 fields.append(field)
 
                 fields_dic[marco.tag] = field
@@ -120,7 +124,7 @@ class FTCodeDetector():
         del fields_dic
         return fields
 
-    def write_file(self, feiShuRequester: FTCodeDetectorFeiShuBitableRequester, file: FTCodeDetectorFeiShuBitableFile, models: [FTCodeDetectorModel]):
+    def write_file(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester, file: FTCodeDetectorFeiShuBitableFile, models: [FTCodeDetectorModel]) -> bool:
         records: [AppTableRecord] = []
         for model in models:
             fields = {
@@ -130,7 +134,9 @@ class FTCodeDetector():
             }
 
             for marco in model.user_defined:
-                if 'type' in marco.attributes:
+                if marco.tag == FTCodeDetectorConst.BUSINESS_MARCO:
+                    fields[FTCodeDetectorConst.BUSINESS_DESC] = marco.value
+                elif 'type' in marco.attributes:
                     if marco.attributes['type'] == FTCodeDetectorConst.FIELD_TYPE_DATETIME:
                         try:
                             date = datetime.strptime(marco.value, r'%Y/%m/%d')
@@ -155,7 +161,7 @@ class FTCodeDetector():
             
             records.append(AppTableRecord.builder().fields(fields).build())
 
-        feiShuRequester.write(file, records)
+        return feiShuRequester.write(file, records)
 
     def update_config(self, file: FTCodeDetectorFeiShuFile, business_type: str):
         if file == None:
@@ -167,11 +173,11 @@ class FTCodeDetector():
         FTCodeDetectorConfig.file_url = file.url
         FTCodeDetectorConfig.file_token = file.token
 
-    def update_and_write(self, feiShuRequester: FTCodeDetectorFeiShuBitableRequester):
-        for (business_type, models) in result.items():
+    def update_and_write(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester) -> bool:
+        for (business_type, business_model) in result.items():
             business_config = FTCodeDetectorConfig.get_business(business_type)
 
-            all_fields = self.get_all_fields(models)
+            all_fields = self.get_all_fields(business_model.models)
             file: FTCodeDetectorFeiShuBitableFile = self.file_exists(feiShuRequester.list_files(), FTCodeDetectorConfig.file_token)
             if file == None:
                 file = feiShuRequester.create_file(FTCodeDetectorConfig.file_name)
@@ -179,28 +185,34 @@ class FTCodeDetector():
                     return False
                 
                 default_table_id = file.table_id
-                file.table_id = feiShuRequester.create_table(file, business_type, all_fields)
+                file.table_id = feiShuRequester.create_table(file, business_model.business_desc, all_fields)
 
                 feiShuRequester.delete_table(file.token, default_table_id)
 
                 self.update_config(file, business_type)
             elif business_config.table_id == None:
-                file.table_id = feiShuRequester.create_table(file, business_type, all_fields)
+                file.table_id = feiShuRequester.create_table(file, business_model.business_desc, all_fields)
                 business_config.update(file)
             else:
                 file.update(business_config)
                 feiShuRequester.create_fields_if_needed(file, all_fields)
             
-            self.write_file(feiShuRequester, file, models)
+            return self.write_file(feiShuRequester, file, business_model.models)
+
+    def send_message(self):
+        chatRequester: FTCodeDetectorFeiShuChatRequester = FTCodeDetectorFeiShuChatRequester(FTCodeDetectorConfig.FEISHU_APP_ID, FTCodeDetectorConfig.FEISHU_APP_SECRET)
+        chatRequester.send_message('机器人测试')
 
     def feishu(self) -> bool:
 
         if len(result) <= 0:
             return True
         
-        feiShuRequester = FTCodeDetectorFeiShuBitableRequester(FTCodeDetectorConfig.FEISHU_APP_ID, FTCodeDetectorConfig.FEISHU_APP_SECRET)
-        self.update_and_write(feiShuRequester)
-
+        feiShuRequester = FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorConfig.FEISHU_APP_ID, FTCodeDetectorConfig.FEISHU_APP_SECRET)
+        feiShuRequester.delete_all_files()
+        # if self.update_and_write(feiShuRequester):
+        self.send_message()
+        
         return True
 
     def print(self):
@@ -210,9 +222,9 @@ class FTCodeDetector():
         print('Total Record Count: ', len(result))
         print()
 
-        for (business_type, models) in result.items():
-            print('business_type:', business_type)
-            for model in models:
+        for (_, business_model) in result.items():
+            print('business: %s', business_model.business_desc)
+            for model in business_model.models:
                 print('    *******************************')
 
             if model.source_file != None:
@@ -245,4 +257,4 @@ if __name__ == '__main__':
         codeDetector.print()
 
     del result
-    FTCodeDetectorConfig.save_config()
+    # FTCodeDetectorConfig.save_config()

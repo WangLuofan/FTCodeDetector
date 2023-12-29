@@ -12,12 +12,6 @@ from FTCodeDetectorModel import *
 from FTCodeDetectorFileManager import FTCodeDetectorFileManager
 from FTCodeDetectorModelStack import FTCodeDetectorModelStack
 
-comment_begin = r'/**'
-start_marco = r'FT_FINANCIAL_CODE_MARK_BEGIN'
-business_marco = r'business'
-end_marco = r'FT_FINANCIAL_CODE_MARK_END'
-comment_end = r'*/'
-
 class FTCodeDetectorScanOperation(threading.Thread):
     def __init__(self, files: [str], thread_lock: threading.Lock, result: dict):
         threading.Thread.__init__(self)
@@ -72,8 +66,8 @@ class FTCodeDetectorScanOperation(threading.Thread):
                     continue
 
                 groups = matchs.groups()
-                if groups[0] == start_marco:
-                    if l == 0 or (lines[l - 1].strip()) != comment_begin:
+                if groups[0] == FTCodeDetectorConst.START_MARCO:
+                    if l == 0 or (lines[l - 1].strip()) != FTCodeDetectorConst.COMMENT_BEGIN:
                         continue
 
                     state = True
@@ -86,12 +80,12 @@ class FTCodeDetectorScanOperation(threading.Thread):
 
                     stack.push(model)
 
-                elif groups[0] == end_marco:
+                elif groups[0] == FTCodeDetectorConst.END_MARCO:
                     if stack.empty() == False:
                         stack.top().source_lines.append((l, lines[l]))
                         model_list.append(stack.top())
 
-                        if l + 1 < len(lines) and lines[l + 1].strip() == comment_end:
+                        if l + 1 < len(lines) and lines[l + 1].strip() == FTCodeDetectorConst.COMMENT_END:
                             comment_end_line = lines[l + 1]
                             stack.top().end_line = l + 1
                             stack.top().source_lines.append((l + 1, comment_end_line))
@@ -99,11 +93,17 @@ class FTCodeDetectorScanOperation(threading.Thread):
                         stack.pop()
                         state = False
 
-                elif groups[0] == business_marco:
+                elif groups[0] == FTCodeDetectorConst.BUSINESS_MARCO:
                     if stack.empty() == False:
                         stack.top().source_lines.append((l, lines[l]))
-                        model.business = groups[2]
-                        model.user_defined.append(self.add_marco(groups, FTCodeDetectorConst.BUSINESS_DESC))
+
+                        marco: FTCodeDetectorMarco = self.add_marco(groups)
+                        marco.update_type(FTCodeDetectorConst.FEILD_TYPE_SINGLE)
+
+                        model.business_type = groups[2]
+                        model.business_desc = marco.get_desc()
+
+                        model.user_defined.append(marco)
 
                 else:
                     if stack.empty() == False:
@@ -118,18 +118,22 @@ class FTCodeDetectorScanOperation(threading.Thread):
             return
 
         model_dict: dict = {}
+        business_dict: dict = {}
+
         for model in models:
-            if model.business not in model_dict:
-                model_dict[model.business] = []
-            model_dict[model.business].append(model)
+            if model.business_type not in model_dict:
+                model_dict[model.business_type] = []
+
+            model_dict[model.business_type].append(model)
+            business_dict[model.business_type] = model.business_desc
 
         self.thread_lock.acquire(True)
 
-        for (business, models) in model_dict.items():
-            if business not in self.result:
-                self.result[business] = models
-            else:
-                self.result[business].append(models.extend())
+        for (business_type, models) in model_dict.items():
+            self.result[business_type] = FTCodeDetectorBusinessModel(business_type, business_dict[business_type], models)
+
+        del model_dict
+        del business_dict
 
         self.thread_lock.release()
 

@@ -6,10 +6,13 @@
     "file_token": "DlRQb3VtAa23WYs1rFBc4jLrnSh",
     "file_url": "https://futu.feishu.cn/base/DlRQb3VtAa23WYs1rFBc4jLrnSh?table=tbl127kaInJWmMLL&view=vewsGfgDzI",
     "platform": "iOS",
+    "chat_group": "机器人测试群",
+    "file_manager": "cairowang,bruceli",
     "business": {
         "expire" : {
             "message_card_id": "ctp_AAyuu48Zmctz",
-            "table_id": "tbl127kaInJWmMLL"
+            "table_id": "tbl127kaInJWmMLL",
+            "file_url": "https://futu.feishu.cn/base/M72ObK1OhatEuAsuhJhcIcGVnOd?table=tblvr51gW5rwn06O"
         }
     }
 }

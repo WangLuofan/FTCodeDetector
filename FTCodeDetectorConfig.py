@@ -45,6 +45,8 @@ class FTCodeDetectorConfig():
         self.FEISHU_APP_SECRET = None
         self.FTOA_APP_KEY = None
         self.FTOA_APP_SEC = None
+        self.file_manager = None
+        self.chat_group = None
         self.platform = None
         self.file_token = None
         self.file_url = None
@@ -101,6 +103,12 @@ class FTCodeDetectorConfig():
 
         if 'file_name' in contents:
             self.file_name = contents['file_name']
+
+        if 'chat_group' in contents:
+            self.chat_group = contents['chat_group']
+
+        if 'file_manager' in contents:
+            self.file_manager = contents['chat_group'].split(',')
 
         if 'business' in contents:
             for (business_type, item) in contents['business'].items():

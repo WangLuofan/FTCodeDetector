@@ -70,8 +70,16 @@ class FTCodeDetectorModel():
     def __init__(self):
         self.start_line = -1
         self.end_line = -1
-        self.business = None
+        self.business_type = None
+        self.business_desc = None
         self.source_file = None
         self.source_lines = []
         
         self.user_defined: [FTCodeDetectorMarco] = []
+
+class FTCodeDetectorBusinessModel():
+    def __init__(self, business_type: str, business_desc: str, models: [FTCodeDetectorModel]):
+        self.business_type = business_type
+        self.business_desc = business_desc
+
+        self.models = models
