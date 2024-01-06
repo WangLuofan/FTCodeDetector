@@ -58,3 +58,14 @@ class FTCodeDetectorFileManager():
         
         os.chdir('..')
         return source_files
+
+    @staticmethod
+    def read_file_lines(file: str):
+        if not os.path.exists(file):
+            return ''
+        
+        contents: [str] = []
+        with open(file, encoding='utf-8') as f:
+            contents = f.readlines()
+
+        return contents

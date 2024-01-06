@@ -2,9 +2,6 @@
 # -*- coding:utf-8 -*-
 # @Author: cairowang
 
-from typing import Any
-
-
 class FTCodeDetectorMarco():
     def __init__(self, tag: str):
         self.tag = tag
@@ -70,8 +67,10 @@ class FTCodeDetectorModel():
     def __init__(self):
         self.start_line = -1
         self.end_line = -1
+
         self.business_marco = None
-        self.updater_marco = None
+        self.principal_marco = None
+        
         self.source_file = None
         self.source_lines = []
         

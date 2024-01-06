@@ -8,6 +8,7 @@ class FTCodeDetectorModelStack():
     def __init__(self):
         self.stack = []
     
+    @property
     def top(self) -> FTCodeDetectorModel:
         if len(self.stack) <= 0:
             return None

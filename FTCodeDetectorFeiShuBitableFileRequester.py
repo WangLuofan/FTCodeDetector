@@ -70,7 +70,7 @@ class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester
 
     def clear_records(self, file: FTCodeDetectorFeiShuBitableFile, table_id: str):
         records: [FTCodeDetectorFeiShuBitableRecord] = self.list_records(file, table_id)
-        if len(records) <= 0:
+        if records == None and len(records) <= 0:
             return
 
         request: BatchDeleteAppTableRecordRequest = BatchDeleteAppTableRecordRequest.builder() \
