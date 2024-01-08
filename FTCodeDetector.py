@@ -15,7 +15,7 @@ from lark_oapi.api.bitable.v1 import *
 from FTCodeDetectorModel import *
 from FTCodeDetectorFtoaRequester import FTCodeDetectorFtoaRequester
 from FTCodeDetectorFeiShuFile import *
-from FTCodeDetectorScanThreading import FTCodeDetectorScanThreading
+from FTCodeDetectorThreading import FTCodeDetectorThreading
 from FTCodeDetectorFileManager import FTCodeDetectorFileManager
 from FTCodeDetectorFeiShuChatRequester import FTCodeDetectorFeiShuChatRequester
 from FTCodeDetectorFeiShuBitableFileRequester import FTCodeDetectorFeiShuBitableFileRequester
@@ -72,7 +72,7 @@ class FTCodeDetector():
 
         cpu_count = min(multiprocessing.cpu_count(), 8)
         slice = int(len(source_files) / cpu_count) + 1
-        cpu_usage = int(len(source_files) / slice) + 1
+        cpu_usage = int(len(source_files) / slice) + (1 if len(source_files) % slice != 0 else 0)
 
         threads = []
         thread_lock = threading.Lock()
@@ -82,7 +82,7 @@ class FTCodeDetector():
                 break
             files = source_files[start : start + slice]
 
-            thread = FTCodeDetectorScanThreading(files, thread_lock, result)
+            thread = FTCodeDetectorThreading(files, thread_lock, result)
             threads.append(thread)
 
         for t in threads:
@@ -171,6 +171,7 @@ class FTCodeDetector():
                 for marco in model.user_defined:
                     if marco.tag == FTCodeDetectorConst.BUSINESS_MARCO:
                         fields[FTCodeDetectorConst.BUSINESS_DESC] = marco.value
+
                     elif 'type' in marco.attributes:
                         if marco.attributes['type'] == FTCodeDetectorConst.FIELD_TYPE_DATETIME:
                             try:
@@ -180,6 +181,7 @@ class FTCodeDetector():
                                 date = datetime.strptime('{year}/{month}/{day}'.format(year = ctime.year, month = ctime.month, day = ctime.day), r'%Y/%m/%d')
 
                             fields[marco.attributes['desc']] = int(date.timestamp() * 1000)
+
                         elif marco.attributes['type'] == FTCodeDetectorConst.FIELD_TYPE_PERSON:
                             feishuId = self.get_feishu_id(marco.value)
 
@@ -190,11 +192,14 @@ class FTCodeDetector():
                                 fields[marco.attributes['desc']] = [{
                                     'id': feishuId if feishuId != None and len(feishuId) > 0 else 'Unknown'
                                 }]
+
                         elif marco.attributes['type'] == FTCodeDetectorConst.FIELD_TYPE_CHECKBOX:
                             if marco.value.lower() == 'true':
                                 fields[marco.attributes['desc']] = True
+                                
                             else:
                                 fields[marco.attributes['desc']] = False
+
                         else:
                             fields[marco.attributes['desc']] = marco.value
             
@@ -306,6 +311,7 @@ class FTCodeDetector():
             return True
         
         feiShuRequester = FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorConfig.FEISHU_APP_ID, FTCodeDetectorConfig.FEISHU_APP_SECRET)
+        feiShuRequester.delete_all_files()
 
         file: FTCodeDetectorFeiShuBitableFile = self.create_file_or_table_if_needed(feiShuRequester, business_dict)
         if file == None:
@@ -327,9 +333,14 @@ class FTCodeDetector():
         print()
 
         for (_, business_model) in business_dict.items():
-            print('business: %s' % business_model.business_desc)
             for model in business_model.models:
                 print('    *******************************')
+
+                if FTCodeDetectorConfig.platform != None:
+                    print('    {0:16}{1}'.format('Platform:', FTCodeDetectorConfig.platform))
+
+                if business_model.business_type != None:
+                    print('    {0:16}{1}'.format('BusinessType:', business_model.business_desc))
 
                 if model.source_file != None:
                     print('    {0:16}{1}'.format('Source:', model.source_file))
@@ -343,6 +354,9 @@ class FTCodeDetector():
 
                 if model.end_line != -1:
                     print('    {0:16}{1}'.format('End Line:', model.end_line))
+
+                if model.principal_marco != None:
+                    print('    {0:16}{1}'.format('Principal:', model.principal_marco.value))
 
                 print('    *******************************')
 

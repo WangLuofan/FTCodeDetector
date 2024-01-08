@@ -7,7 +7,7 @@ import threading
 from FTCodeDetectorModel import *
 from FTCodeDetectorNFA import FTCodeDetectorNFA
 
-class FTCodeDetectorScanThreading(threading.Thread):
+class FTCodeDetectorThreading(threading.Thread):
     def __init__(self, files: [str], thread_lock: threading.Lock, result: [FTCodeDetectorModel]):
         threading.Thread.__init__(self)
         self.result = result
@@ -22,5 +22,3 @@ class FTCodeDetectorScanThreading(threading.Thread):
                 self.thread_lock.acquire(True)
                 self.result.extend(models)
                 self.thread_lock.release()
-
-            return

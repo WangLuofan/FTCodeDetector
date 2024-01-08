@@ -60,7 +60,7 @@ class FTCodeDetectorNFA():
         self.stack.top.source_lines.append(line)
 
     def match(self, file: str) -> [FTCodeDetectorModel]:
-        regex = re.compile(r'^<([_a-zA-Z0-9]+)(?:\s+(.+))*>\s*(\S*)')
+        regex = re.compile(r'^<([_a-zA-Z0-9]+)(?:\s+(.+))*>\s*(.*)')
         lines = FTCodeDetectorFileManager.read_file_lines(file)
         models: [FTCodeDetectorModel] = []
 
