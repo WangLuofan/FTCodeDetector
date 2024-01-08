@@ -196,7 +196,7 @@ class FTCodeDetector():
                         elif marco.attributes['type'] == FTCodeDetectorConst.FIELD_TYPE_CHECKBOX:
                             if marco.value.lower() == 'true':
                                 fields[marco.attributes['desc']] = True
-                                
+
                             else:
                                 fields[marco.attributes['desc']] = False
 
@@ -292,7 +292,12 @@ class FTCodeDetector():
                 'template_id': FTCodeDetectorConfig.message_card_id,
                 'template_variable': {
                     'scan_date_time': '{year}-{month}-{day} {hour}:{minute}:{second}' \
-                        .format(year = '%04d' % ctime.year, month = '%02d' % ctime.month, day = '%02d' % ctime.day, hour = '%02d' % ctime.hour, minute = '%02d' % ctime.minute, second = '%02d' % ctime.second),
+                        .format(year = '%04d' % ctime.year, 
+                                month = '%02d' % ctime.month, 
+                                day = '%02d' % ctime.day, 
+                                hour = '%02d' % ctime.hour, 
+                                minute = '%02d' % ctime.minute, 
+                                second = '%02d' % ctime.second),
                     'scan_project_directory': self.directory,
                     'scan_file_ext': extensions,
                     'scan_count_result': str(len(models)),
