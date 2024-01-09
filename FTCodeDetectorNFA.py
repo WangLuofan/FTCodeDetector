@@ -111,6 +111,9 @@ class FTCodeDetectorNFA():
                     self.state = FTCodeDetectorNFAState.STATE_COMMENT_END_END
                     self.add_line_if_state_correct((line + 1, content))
 
+                elif self.state == FTCodeDetectorNFAState.STATE_NORMAL_CODE:
+                    self.state = FTCodeDetectorNFAState.STATE_INITIAL
+
             else:
 
                 if self.state == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_BEGIN or self.state == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_CONTENT:
@@ -149,7 +152,12 @@ class FTCodeDetectorNFA():
                         self.state = FTCodeDetectorNFAState.STATE_COMMENT_NORMAL_CODE
 
                     else:
-                        self.state = FTCodeDetectorNFAState.STATE_INITIAL
+
+                        if self.state == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN or self.state == FTCodeDetectorNFAState.STATE_NORMAL_CODE:
+                            self.state = FTCodeDetectorNFAState.STATE_NORMAL_CODE
+                        else:
+                            self.state = FTCodeDetectorNFAState.STATE_INITIAL
+
                         self.stack.pop()
 
         if self.state == FTCodeDetectorNFAState.STATE_COMMENT_NORMAL_CODE:
