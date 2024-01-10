@@ -110,6 +110,7 @@ class FTCodeDetector():
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.FILE_DESC, FTCodeDetectorConst.FIELD_TYPE_TEXT))
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.SOURCE_LINE_DESC, FTCodeDetectorConst.FIELD_TYPE_TEXT))
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.PLATFORM_DESC, FTCodeDetectorConst.FEILD_TYPE_SINGLE))
+        fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.DEPARTMENT_DESC, FTCodeDetectorConst.FEILD_TYPE_SINGLE))
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.BUSINESS_DESC, FTCodeDetectorConst.FEILD_TYPE_SINGLE))
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.PRINCIPAL_DESC, FTCodeDetectorConst.FIELD_TYPE_PERSON))
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.CODEFRAG_DESC, FTCodeDetectorConst.FIELD_TYPE_TEXT))
@@ -145,11 +146,23 @@ class FTCodeDetector():
             return None
         
         return user_info['feishuId']
+    
+    def get_user_department(self, nick: str) -> str:
+
+        department_info = FTCodeDetectorFtoaRequester.get_user_department(nick)
+
+        if department_info == None or len(department_info) <= 0:
+            return None
+        
+        department: dict = department_info[0]
+        if 'department' not in department and 'name' not in department['department']:
+            return None
+
+        return department['department']['name']
 
     def write(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester, file: FTCodeDetectorFeiShuBitableFile, business_model: FTCodeDetectorBusinessModel) -> bool:
         records: [AppTableRecord] = []
         for model in business_model.models:
-            feishuId = self.get_feishu_id(model.principal_marco.value if model.principal_marco != None else 'Unknown')
 
             fields = {
                 FTCodeDetectorConst.FILE_DESC: FTCodeDetectorFileManager.get_file_name(model.source_file),
@@ -159,13 +172,19 @@ class FTCodeDetector():
                 FTCodeDetectorConst.CODEFRAG_DESC: ''.join(s for (_, s) in model.source_lines)
             }
 
-            if feishuId != None:
-                fields[FTCodeDetectorConst.PRINCIPAL_DESC] = [{
-                    'id': feishuId
-                }]
+            if model.principal_marco.value != None:
+                department_name: str = self.get_user_department(model.principal_marco.value)
+                if department_name != None:
+                    fields[FTCodeDetectorConst.DEPARTMENT_DESC] = department_name
 
-                if self.is_manager(feishuId) == False:
-                    feiShuRequester.add_member_perm(feishuId, file, FTCodeDetectorConst.FILE_PERM_VIEW)
+                feishuId = self.get_feishu_id(model.principal_marco.value)
+                if feishuId != None:
+                    fields[FTCodeDetectorConst.PRINCIPAL_DESC] = [{
+                        'id': feishuId
+                    }]
+
+                    if self.is_manager(feishuId) == False:
+                        feiShuRequester.add_member_perm(feishuId, file, FTCodeDetectorConst.FILE_PERM_VIEW)
 
             if business_model.business_type != FTCodeDetectorConst.SUMMARY_BUSINESS_TYPE:
                 for marco in model.user_defined:
@@ -395,4 +414,4 @@ if __name__ == '__main__':
     codeDetector: FTCodeDetector = FTCodeDetector()
 
     codeDetector.print(codeDetector.run())
-    FTCodeDetectorConfig.save_config()
+    # FTCodeDetectorConfig.save_config()

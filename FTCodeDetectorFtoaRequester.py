@@ -7,17 +7,28 @@ from Ftoa import Ftoa
 
 class FTCodeDetectorFtoaRequester():
     @staticmethod
-    def get_user_info(nick: str) -> dict:
-        
-        if len(nick) <= 0:
-            return None
-
+    def new_ftoa() -> Ftoa:
         ftoa = Ftoa.Ftoa({
             'appKey': FTCodeDetectorConfig.FTOA_APP_KEY,
             'appSecret': FTCodeDetectorConfig.FTOA_APP_SEC,
             'region': 'ML',
         })
 
-        user_info: dict = ftoa.getStaffByNick(nick)
+        return ftoa
+
+    @staticmethod
+    def get_user_info(nick: str) -> dict:
+        
+        if nick == None or len(nick) <= 0:
+            return None
+
+        user_info: dict = FTCodeDetectorFtoaRequester.new_ftoa().getStaffByNick(nick)
 
         return user_info
+
+    @staticmethod
+    def get_user_department(nick: str) -> list:
+        if nick == None or len(nick) <= 0:
+            return None
+        
+        return FTCodeDetectorFtoaRequester.new_ftoa().getStaffDepartmentListByNick(nick)
