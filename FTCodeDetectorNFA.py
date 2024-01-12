@@ -81,6 +81,7 @@ class FTCodeDetectorNFA():
                 
                 elif self.state == FTCodeDetectorNFAState.STATE_COMMENT_NORMAL_CODE:
                     self.state = FTCodeDetectorNFAState.STATE_COMMENT_END_BEGIN
+
                     self.add_line_if_state_correct((line + 1, content))
 
             elif content.strip() == FTCodeDetectorConst.COMMENT_END:
@@ -149,6 +150,8 @@ class FTCodeDetectorNFA():
                                 self.state == FTCodeDetectorNFAState.STATE_COMMENT_NORMAL_CODE:
                         
                         self.add_line_if_state_correct((line + 1, content))
+                        self.stack.top.text_lines.append(content)
+
                         self.state = FTCodeDetectorNFAState.STATE_COMMENT_NORMAL_CODE
 
                     else:

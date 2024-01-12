@@ -12,6 +12,7 @@ FTCodeDetectorConst.PLATFORM_DESC = '所属平台'
 FTCodeDetectorConst.BUSINESS_DESC = '所属业务'
 FTCodeDetectorConst.DEPARTMENT_DESC = '所属部门'
 FTCodeDetectorConst.CODEFRAG_DESC = '代码片段'
+FTCodeDetectorConst.DIGEST_DESC = '摘要'
 
 FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN = 'Unknown'
 FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN_DESC = '未知业务'

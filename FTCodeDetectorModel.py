@@ -2,6 +2,8 @@
 # -*- coding:utf-8 -*-
 # @Author: cairowang
 
+import FTCodeDetectorHelper
+
 class FTCodeDetectorMarco():
     def __init__(self, tag: str):
         self.tag = tag
@@ -73,8 +75,15 @@ class FTCodeDetectorModel():
         
         self.source_file = None
         self.source_lines = []
+
+        self.text_lines = []
         
         self.user_defined: [FTCodeDetectorMarco] = []
+
+    @property
+    def hexdigest(self) -> str:
+        text: str = self.source_file.join(text for text in self.text_lines)
+        return FTCodeDetectorHelper.FTCodeDetectorHelper.md5(text)
 
 
 class FTCodeDetectorBusinessModel():

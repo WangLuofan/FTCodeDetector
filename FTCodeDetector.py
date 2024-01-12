@@ -128,6 +128,8 @@ class FTCodeDetector():
                     fields_dic[marco.tag] = field
 
         del fields_dic
+
+        fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.DIGEST_DESC, FTCodeDetectorConst.FIELD_TYPE_TEXT))
         return fields
 
     def is_manager(self, nick: str) -> bool:
@@ -166,11 +168,12 @@ class FTCodeDetector():
         for model in business_model.models:
 
             fields = {
-                FTCodeDetectorConst.FILE_DESC: FTCodeDetectorFileManager.get_file_name(model.source_file),
+                FTCodeDetectorConst.FILE_DESC: model.source_file,
                 FTCodeDetectorConst.SOURCE_LINE_DESC: '{start} ~ {end}'.format(start = model.start_line, end = model.end_line),
                 FTCodeDetectorConst.PLATFORM_DESC: FTCodeDetectorConfig.platform,
                 FTCodeDetectorConst.BUSINESS_DESC: model.business_marco.value,
-                FTCodeDetectorConst.CODEFRAG_DESC: ''.join(s for (_, s) in model.source_lines)
+                FTCodeDetectorConst.CODEFRAG_DESC: ''.join(s for s in model.text_lines),
+                FTCodeDetectorConst.DIGEST_DESC: model.hexdigest
             }
 
             if model.principal_marco != None and model.principal_marco.value != None:
@@ -225,7 +228,7 @@ class FTCodeDetector():
             
             records.append(AppTableRecord.builder().fields(fields).build())
 
-        return feiShuRequester.write(file, file.table_id[business_model.business_type], records)
+        return feiShuRequester.append_records(file, file.table_id[business_model.business_type], records)
     
     def add_manager_perm(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester, file: FTCodeDetectorFeiShuBitableFile):
         if FTCodeDetectorConfig.file_manager == None or len(FTCodeDetectorConfig.file_manager) <= 0:
@@ -298,9 +301,8 @@ class FTCodeDetector():
         for idx in range(0, item_count):
             model = models[idx]
 
-            filename = FTCodeDetectorFileManager.get_file_name(model.source_file)
             scan_result.append({
-                            'scan_result_file': filename,
+                            'scan_result_file': model.source_file,
                             'scan_line_result': '{start} ~ {end}'.format(start = model.start_line + 1, end = model.end_line + 1),
                             'scan_platform_result': FTCodeDetectorConfig.platform,
                             'scan_principle_result': '<at email={principal}@futunn.com></at>'.format(principal = model.principal_marco.value) if model.principal_marco != None and \
@@ -338,6 +340,7 @@ class FTCodeDetector():
             return True
         
         feiShuRequester = FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorConfig.FEISHU_APP_ID, FTCodeDetectorConfig.FEISHU_APP_SECRET)
+        feiShuRequester.delete_all_files()
 
         file: FTCodeDetectorFeiShuBitableFile = self.create_file_or_table_if_needed(feiShuRequester, business_dict)
         if file == None:
@@ -416,4 +419,4 @@ if __name__ == '__main__':
     codeDetector: FTCodeDetector = FTCodeDetector()
 
     codeDetector.print(codeDetector.run())
-    FTCodeDetectorConfig.save_config()
+    # FTCodeDetectorConfig.save_config()
