@@ -161,7 +161,7 @@ class FTCodeDetector():
 
         return department['department']['name']
 
-    def write(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester, file: FTCodeDetectorFeiShuBitableFile, business_model: FTCodeDetectorBusinessModel) -> bool:
+    def append_or_update_records(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester, file: FTCodeDetectorFeiShuBitableFile, business_model: FTCodeDetectorBusinessModel) -> bool:
         records: [AppTableRecord] = []
         for model in business_model.models:
 
@@ -344,7 +344,7 @@ class FTCodeDetector():
             return False
         
         for (_, business_model) in business_dict.items():
-            self.write(feiShuRequester, file, business_model)
+            self.append_or_update_records(feiShuRequester, file, business_model)
 
         if FTCodeDetectorConfig.message_card_id != None and len(FTCodeDetectorConfig.message_card_id) >= 0:
             self.send_message(business_dict)

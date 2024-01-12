@@ -37,6 +37,29 @@ class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester
 
         return items
 
+    def update_records(self, file: FTCodeDetectorFeiShuBitableFile, table_id: str, records: [FTCodeDetectorFeiShuBitableRecord]):
+        records: [lark_oapi.bitable.v1.model.AppTableRecord] = [record.appTableRecord for record in records]
+
+        request: BatchUpdateAppTableRecordRequest = BatchUpdateAppTableRecordRequest.builder() \
+            .app_token(file.token) \
+            .table_id(table_id) \
+            .user_id_type("user_id") \
+            .request_body(BatchUpdateAppTableRecordRequestBody.builder() \
+                          .records(records) \
+                            .build()) \
+                    .build()
+        
+        response: BatchUpdateAppTableRecordResponse = self.client.bitable.v1.app_table_record.batch_update(request)
+
+        # 处理失败返回
+        if not response.success():
+            lark.logger.error(
+                f"client.bitable.v1.app_table_record.batch_update failed, code: {response.code}, msg: {response.msg}, log_id: {response.get_log_id()}")
+            return
+
+        # 处理业务结果
+        lark.logger.info(lark.JSON.marshal(response.data, indent=4))
+
     def list_records(self, file: FTCodeDetectorFeiShuBitableFile, table_id: str, page_token: str = '') -> [FTCodeDetectorFeiShuBitableRecord]:
 
         request: ListAppTableRecordRequest = ListAppTableRecordRequest.builder() \
@@ -69,16 +92,12 @@ class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester
         return records
 
     def clear_records(self, file: FTCodeDetectorFeiShuBitableFile, table_id: str):
-        records: [FTCodeDetectorFeiShuBitableRecord] = self.list_records(file, table_id)
-        if records == None and len(records) <= 0:
-            return
 
         request: BatchDeleteAppTableRecordRequest = BatchDeleteAppTableRecordRequest.builder() \
             .app_token(file.token) \
             .table_id(table_id) \
             .request_body(BatchDeleteAppTableRecordRequestBody \
                           .builder() \
-                          .records([record.record_id for record in records]) \
                           .build()) \
             .build()
         
@@ -136,11 +155,9 @@ class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester
         for field in fields:
             self.create_field(file, table_id, field)
 
-    def write(self, file: FTCodeDetectorFeiShuBitableFile, table_id: str, records: [AppTableRecord]) -> bool:
+    def append_records(self, file: FTCodeDetectorFeiShuBitableFile, table_id: str, records: [AppTableRecord]) -> bool:
         if records == None or len(records) <= 0:
             return
-
-        self.clear_records(file, table_id)
 
         request: BatchCreateAppTableRecordRequest = BatchCreateAppTableRecordRequest.builder() \
             .app_token(file.token) \

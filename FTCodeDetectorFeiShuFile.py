@@ -46,20 +46,52 @@ class FTCodeDetectorFeiShuFile():
 
 class FTCodeDetectorFeiShuBitableRecord():
     def __init__(self, record: lark_oapi.bitable.v1.model.AppTableRecord):
-        if record.record_id != None:
-            self.record_id = record.record_id
+        self.record_id = record.record_id
 
-        if record.created_by != None:
-            self.created_by = record.created_by.name
+        self.created_by = record.created_by
 
-        if record.created_time != None:
-            self.created_time = record.created_time
+        self.created_time = record.created_time
 
-        if record.last_modified_by != None:
-            self.last_modified_by = record.last_modified_by.name
+        self.last_modified_by = record.last_modified_by
 
-        if record.last_modified_time != None:
-            self.last_modified_time = record.last_modified_time
+        self.last_modified_time = record.last_modified_time
+
+        self.fields = record.fields
+
+    def __eq__(self, __value: object) -> bool:
+        
+        long_fields = None
+        shrt_fields = None
+
+        if __value is FTCodeDetectorFeiShuBitableRecord or __value is lark_oapi.bitable.v1.model.AppTableRecord:
+
+            if self.record_id != None and __value.record_id != None:
+                return self.record_id == __value.record_id
+            
+            long_fields = self.fields if len(self.fields) >= len(__value.fields) else __value.fields
+            shrt_fields = self.fields if len(self.fields) < len(__value.fields) else __value.fields
+
+        elif __value is dict:
+            long_fields = self.fields if len(self.fields) >= len(__value) else __value
+            shrt_fields = self.fields if len(self.fields) < len(__value) else __value
+
+        for(title, value) in shrt_fields:
+            if title not in long_fields:
+                return False
+            
+            if long_fields[title] != value:
+                return False
+            
+        return True
+    
+    def appTableRecord(self):
+        record: lark_oapi.bitable.v1.model.AppTableRecord = lark_oapi.bitable.v1.model.AppTableRecord.builder() \
+            .created_by(self.created_by) \
+                .created_time(self.created_time) \
+                    .last_modified_by(self.last_modified_by) \
+                        .last_modified_time(self.last_modified_time) \
+                            .fields(self.fields).build()
+        return record
 
 class FTCodeDetectorFeiShuBitableField():
     def __init__(self, title: str, type: str) -> None:

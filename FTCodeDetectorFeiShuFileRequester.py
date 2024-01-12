@@ -20,7 +20,7 @@ class FTCodeDetectorFeiShuFileRequester(FTCodeDetectorFeiShuRequester):
     def create_file(self, file_name: str) -> FTCodeDetectorFeiShuFile:
         raise NotImplementedError('子类必须实现该方法')
     
-    def write(self, file: FTCodeDetectorFeiShuFile, records: [Any]) -> bool:
+    def append_records(self, file: FTCodeDetectorFeiShuFile, records: [Any]) -> bool:
         raise NotImplementedError('子类必须实现该方法')
     
     def delete_file(self, file: FTCodeDetectorFeiShuFile) -> bool:
