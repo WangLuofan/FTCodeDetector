@@ -3,6 +3,7 @@
 # @Author: cairowang
 
 import FTCodeDetectorHelper
+from FTCodeDetectorConstDefine import *
 
 class FTCodeDetectorMarco():
     def __init__(self, tag: str):
@@ -82,7 +83,10 @@ class FTCodeDetectorModel():
 
     @property
     def hexdigest(self) -> str:
-        text: str = self.source_file.join(text for text in self.text_lines)
+        text: str = self.source_file \
+            .join(self.business_marco.value if self.business_marco != None else FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN) \
+                .join(text for text in self.text_lines)
+        
         return FTCodeDetectorHelper.FTCodeDetectorHelper.md5(text)
 
 
