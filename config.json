@@ -4,5 +4,18 @@
    "ftoa_app_key": "5fba41da7c5e5db3327fe3d31228e5cc",
    "ftoa_app_sec": "2c0cbab50583a1c777eebe1c61124417",
    "platform": "iOS",
-   "message_card_id": "ctp_AAyuu48Zmctz"
+   "file_name": "\u4e1a\u52a1\u4ee3\u7801\u626b\u63cf",
+   "file_token": "KxulbEpQpaZlilshaZDcO9Tlnq7",
+   "file_url": "https://futu.feishu.cn/base/KxulbEpQpaZlilshaZDcO9Tlnq7",
+   "message_card_id": "ctp_AAyuu48Zmctz",
+   "business": {
+      "expire": {
+         "table_id": "tblOM4jFxHfvJbze",
+         "file_url": "https://futu.feishu.cn/base/KxulbEpQpaZlilshaZDcO9Tlnq7?table=tblOM4jFxHfvJbze"
+      },
+      "Summary": {
+         "table_id": "tblPf5zqcuI9P6YZ",
+         "file_url": "https://futu.feishu.cn/base/KxulbEpQpaZlilshaZDcO9Tlnq7?table=tblPf5zqcuI9P6YZ"
+      }
+   }
 }

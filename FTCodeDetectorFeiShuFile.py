@@ -58,28 +58,30 @@ class FTCodeDetectorFeiShuBitableRecord():
 
         self.fields = record.fields
 
+        self.hexdigest = record.fields['摘要']
+
     def __eq__(self, __value: object) -> bool:
         
-        long_fields = None
-        shrt_fields = None
+        right_fields = None
 
         if __value is FTCodeDetectorFeiShuBitableRecord or __value is lark_oapi.bitable.v1.model.AppTableRecord:
 
             if self.record_id != None and __value.record_id != None:
                 return self.record_id == __value.record_id
             
-            long_fields = self.fields if len(self.fields) >= len(__value.fields) else __value.fields
-            shrt_fields = self.fields if len(self.fields) < len(__value.fields) else __value.fields
+            right_fields = __value.fields
 
-        elif __value is dict:
-            long_fields = self.fields if len(self.fields) >= len(__value) else __value
-            shrt_fields = self.fields if len(self.fields) < len(__value) else __value
+        else:
+            right_fields = __value
 
-        for(title, value) in shrt_fields:
-            if title not in long_fields:
+        if len(self.fields) != len(right_fields):
+            return False
+
+        for(title, value) in self.fields.items():
+            if title not in right_fields:
                 return False
             
-            if long_fields[title] != value:
+            if right_fields[title] != value:
                 return False
             
         return True
@@ -90,7 +92,9 @@ class FTCodeDetectorFeiShuBitableRecord():
                 .created_time(self.created_time) \
                     .last_modified_by(self.last_modified_by) \
                         .last_modified_time(self.last_modified_time) \
-                            .fields(self.fields).build()
+                            .fields(self.fields) \
+                                .record_id(self.record_id) \
+                                    .build()
         return record
 
 class FTCodeDetectorFeiShuBitableField():

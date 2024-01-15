@@ -38,7 +38,7 @@ class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester
         return items
 
     def update_records(self, file: FTCodeDetectorFeiShuBitableFile, table_id: str, records: [FTCodeDetectorFeiShuBitableRecord]):
-        records: [lark_oapi.bitable.v1.model.AppTableRecord] = [record.appTableRecord for record in records]
+        records: [lark_oapi.bitable.v1.model.AppTableRecord] = [record.appTableRecord() for record in records]
 
         request: BatchUpdateAppTableRecordRequest = BatchUpdateAppTableRecordRequest.builder() \
             .app_token(file.token) \

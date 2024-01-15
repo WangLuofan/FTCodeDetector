@@ -164,7 +164,16 @@ class FTCodeDetector():
         return department['department']['name']
 
     def append_or_update_records(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester, file: FTCodeDetectorFeiShuBitableFile, business_model: FTCodeDetectorBusinessModel) -> bool:
-        records: [AppTableRecord] = []
+
+        all_records: [FTCodeDetectorFeiShuBitableRecord] = feiShuRequester.list_records(file, file.table_id[business_model.business_type])
+        all_records_dict: {str: [FTCodeDetectorFeiShuBitableRecord]} = {}
+
+        for item in all_records:
+            all_records_dict[item.hexdigest] = item
+
+        recordsToAppend: [AppTableRecord] = []
+        recordsToUpdate: [FTCodeDetectorFeiShuBitableRecord] = []
+
         for model in business_model.models:
 
             fields = {
@@ -226,9 +235,23 @@ class FTCodeDetector():
                         else:
                             fields[marco.attributes['desc']] = marco.value
             
-            records.append(AppTableRecord.builder().fields(fields).build())
+            if model.hexdigest in all_records_dict:
+                if all_records_dict[model.hexdigest] != fields:
+                    all_records_dict[model.hexdigest].fields = fields
+                    recordsToUpdate.append(all_records_dict[model.hexdigest])
+            else:
+                recordsToAppend.append(AppTableRecord.builder().fields(fields).build())
 
-        return feiShuRequester.append_records(file, file.table_id[business_model.business_type], records)
+        result: bool = False 
+        if len(recordsToAppend) > 0:
+            feiShuRequester.append_records(file, file.table_id[business_model.business_type], recordsToAppend)
+            result = True
+
+        if len(recordsToUpdate) > 0:
+            feiShuRequester.update_records(file, file.table_id[business_model.business_type], recordsToUpdate)
+            result = result or True
+
+        return result
     
     def add_manager_perm(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester, file: FTCodeDetectorFeiShuBitableFile):
         if FTCodeDetectorConfig.file_manager == None or len(FTCodeDetectorConfig.file_manager) <= 0:
@@ -340,7 +363,6 @@ class FTCodeDetector():
             return True
         
         feiShuRequester = FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorConfig.FEISHU_APP_ID, FTCodeDetectorConfig.FEISHU_APP_SECRET)
-        feiShuRequester.delete_all_files()
 
         file: FTCodeDetectorFeiShuBitableFile = self.create_file_or_table_if_needed(feiShuRequester, business_dict)
         if file == None:
@@ -419,4 +441,4 @@ if __name__ == '__main__':
     codeDetector: FTCodeDetector = FTCodeDetector()
 
     codeDetector.print(codeDetector.run())
-    # FTCodeDetectorConfig.save_config()
+    FTCodeDetectorConfig.save_config()
