@@ -17,6 +17,15 @@ class FTCodeDetectorFileManager():
     def get_file_name(path: str):
         return os.path.basename(path)
 
+    @staticmethod
+    def get_file_path(path: str):
+        base_name: str = FTCodeDetectorFileManager.get_file_name(path)
+        
+        if base_name == None or len(base_name) <= 0:
+            return None
+        
+        return path[0:len(path) - len(base_name)]
+
     def is_valid_file(self, path: str):
         ext = self.get_file_extension(path)
         if len(ext) <= 0:

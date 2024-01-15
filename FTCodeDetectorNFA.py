@@ -74,6 +74,7 @@ class FTCodeDetectorNFA():
 
                     model: FTCodeDetectorModel = FTCodeDetectorModel()
                     model.start_line = line + 1
+                    model.abs_path = file
                     model.source_file = FTCodeDetectorFileManager.get_file_name(file)
                     model.source_lines.append((line + 1, content))
                 

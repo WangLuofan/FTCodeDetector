@@ -13,6 +13,7 @@ from datetime import datetime
 from lark_oapi.api.bitable.v1 import *
 
 from FTCodeDetectorModel import *
+from FTCodeDetectorGitHeper import *
 from FTCodeDetectorFtoaRequester import FTCodeDetectorFtoaRequester
 from FTCodeDetectorFeiShuFile import *
 from FTCodeDetectorThreading import FTCodeDetectorThreading
@@ -108,7 +109,7 @@ class FTCodeDetector():
         fields: [FTCodeDetectorFeiShuBitableField] = []
         fields_dic: dict = {}
 
-        fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.FILE_DESC, FTCodeDetectorConst.FIELD_TYPE_TEXT))
+        fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.FILE_DESC, FTCodeDetectorConst.FIELD_TYPE_LINK))
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.SOURCE_LINE_DESC, FTCodeDetectorConst.FIELD_TYPE_TEXT))
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.PLATFORM_DESC, FTCodeDetectorConst.FEILD_TYPE_SINGLE))
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.DEPARTMENT_DESC, FTCodeDetectorConst.FEILD_TYPE_SINGLE))
@@ -127,9 +128,8 @@ class FTCodeDetector():
 
                     fields_dic[marco.tag] = field
 
-        del fields_dic
-
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.DIGEST_DESC, FTCodeDetectorConst.FIELD_TYPE_TEXT))
+
         return fields
 
     def is_manager(self, nick: str) -> bool:
@@ -177,12 +177,17 @@ class FTCodeDetector():
         for model in business_model.models:
 
             fields = {
-                FTCodeDetectorConst.FILE_DESC: model.source_file,
                 FTCodeDetectorConst.SOURCE_LINE_DESC: '{start} ~ {end}'.format(start = model.start_line, end = model.end_line),
                 FTCodeDetectorConst.PLATFORM_DESC: FTCodeDetectorConfig.platform,
                 FTCodeDetectorConst.BUSINESS_DESC: model.business_marco.value,
                 FTCodeDetectorConst.CODEFRAG_DESC: ''.join(s for s in model.text_lines),
-                FTCodeDetectorConst.DIGEST_DESC: model.hexdigest
+                FTCodeDetectorConst.DIGEST_DESC: model.hexdigest,
+            }
+
+            git_url: str = FTCodeDetectorGitHelper.get_file_url(model.abs_path)
+            fields[FTCodeDetectorConst.FILE_DESC] = {
+                'text': model.source_file,
+                'link': git_url if git_url != None and len(git_url) > 0 else ''
             }
 
             if model.principal_marco != None and model.principal_marco.value != None:

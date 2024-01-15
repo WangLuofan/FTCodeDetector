@@ -114,6 +114,8 @@ class FTCodeDetectorFeiShuBitableField():
     def get_field_type(self) -> int:
         if self.field_type == FTCodeDetectorConst.FIELD_TYPE_TEXT:
             return 1
+        if self.field_type == FTCodeDetectorConst.FIELD_TYPE_LINK:
+            return 15
         if self.field_type == FTCodeDetectorConst.FIELD_TYPE_DATETIME:
             return 5
         if self.field_type == FTCodeDetectorConst.FEILD_TYPE_SINGLE:
@@ -128,6 +130,8 @@ class FTCodeDetectorFeiShuBitableField():
     def get_field_ui_type(self) -> str:
         if self.field_type == FTCodeDetectorConst.FIELD_TYPE_TEXT:
             return FTCodeDetectorConst.FIELD_UI_TYPE_TEXT
+        if self.field_type == FTCodeDetectorConst.FIELD_TYPE_LINK:
+            return FTCodeDetectorConst.FIELD_UI_TYPE_LINK
         if self.field_type == FTCodeDetectorConst.FIELD_TYPE_DATETIME:
             return FTCodeDetectorConst.FIELD_UI_TYPE_DATETIME
         if self.field_type == FTCodeDetectorConst.FEILD_TYPE_SINGLE:
