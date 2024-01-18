@@ -14,6 +14,7 @@ from FTCodeDetectorSingleton import FTCodeDetectorSingleton
 class FTCodeDetectorBusinessConfig():
     def __init__(self, type: str, config: dict = None) -> None:
         self.business_type = type
+        self.business_desc = type
 
         self.table_id = None
         self.file_url = None
@@ -25,6 +26,9 @@ class FTCodeDetectorBusinessConfig():
 
             if 'file_url' in config:
                 self.file_url = config['file_url']
+
+            if 'business_desc' in config:
+                self.business_desc = config['business_desc']
 
     def update(self, bitable_file: FTCodeDetectorFeiShuBitableFile):
         if bitable_file == None:
@@ -144,10 +148,14 @@ class FTCodeDetectorConfig():
         for (business_type, item) in self.business.items():
             business_contents = {}
 
-            if item.table_id != None and len(item.table_id) > -1:
+            if item.table_id != None and len(item.table_id) > 0:
                 business_contents['table_id'] = item.table_id
-            if item.file_url != None and len(item.file_url) > -1:
+                
+            if item.file_url != None and len(item.file_url) > 0:
                 business_contents['file_url'] = item.file_url
+
+            if item.business_desc != None and len(item.business_desc) > 0:
+                business_contents['business_desc'] = item.business_desc
 
             business[business_type] = business_contents
 

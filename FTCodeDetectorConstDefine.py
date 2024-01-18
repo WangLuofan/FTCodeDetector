@@ -13,6 +13,7 @@ FTCodeDetectorConst.BUSINESS_DESC = '所属业务'
 FTCodeDetectorConst.DEPARTMENT_DESC = '所属部门'
 FTCodeDetectorConst.CODEFRAG_DESC = '代码片段'
 FTCodeDetectorConst.DIGEST_DESC = '摘要'
+FTCodeDetectorConst.HANDLED_DESC = '是否处理'
 
 FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN = 'Unknown'
 FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN_DESC = '未知业务'
@@ -21,6 +22,10 @@ FTCodeDetectorConst.PRINCIPAL_DESC = '负责人'
 
 FTCodeDetectorConst.SUMMARY_BUSINESS_TYPE = 'Summary'
 FTCodeDetectorConst.SUMMARY_TABLE_NAME = '汇总信息'
+
+FTCodeDetectorConst.HANDLED_RESULT_YES = '已处理'
+FTCodeDetectorConst.HANDLED_RESULT_NO = '未处理'
+FTCodeDetectorConst.HANDLED_RESULT_NONE = '无需处理'
 
 FTCodeDetectorConst.FIELD_TYPE_TEXT = 'text'
 FTCodeDetectorConst.FIELD_TYPE_LINK = 'link'
