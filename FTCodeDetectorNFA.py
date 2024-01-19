@@ -10,7 +10,7 @@ from typing import Any
 from FTCodeDetectorModel import *
 from FTCodeDetectorFileManager import FTCodeDetectorFileManager
 from FTCodeDetectorConstDefine import FTCodeDetectorConst
-from FTCodeDetectorModelStack import FTCodeDetectorModelStack
+from FTCodeDetectorStack import FTCodeDetectorStack
 
 @unique
 class FTCodeDetectorNFAState(IntEnum):
@@ -19,17 +19,17 @@ class FTCodeDetectorNFAState(IntEnum):
     STATE_COMMENT_BEGIN = 2,
     STATE_COMMENT_BEGIN_BEGIN = 3,
     STATE_COMMENT_BEGIN_CONTENT = 4,
-    STATE_COMMENT_BEGIN_CLOSE = 5,
+    STATE_COMMENT_BEGIN_END = 5,
     STATE_COMMENT_NORMAL_CODE = 6,
-    STATE_COMMENT_END_BEGIN = 7,
     STATE_COMMENT_END_END = 8,
     STATE_ACCEPT = 9,
     STATE_ERROR = 10
 
 class FTCodeDetectorNFA():
     def __init__(self):
-        self.state = FTCodeDetectorNFAState.STATE_INITIAL
-        self.stack = FTCodeDetectorModelStack()
+        self.stateStack: FTCodeDetectorStack = FTCodeDetectorStack()
+
+        self.modelStack: FTCodeDetectorStack = FTCodeDetectorStack()
 
     def __setattr__(self, __name: str, __value: Any) -> None:
         if __name == 'state':
@@ -52,12 +52,11 @@ class FTCodeDetectorNFA():
 
         return marco
     
-    def add_line_if_state_correct(self, line: (int, str)):
-        if self.stack.empty():
-            self.state = FTCodeDetectorNFAState.STATE_ERROR
+    def add_line_if_needed(self, line: (int, str)):
+        if self.modelStack.empty or line == None:
             return
 
-        self.stack.top.source_lines.append(line)
+        self.modelStack.top.source_lines.append(line)
 
     def match(self, file: str) -> [FTCodeDetectorModel]:
         regex = re.compile(r'^<([_a-zA-Z0-9]+)(?:\s+(.+))*>\s*(.*)')
@@ -69,108 +68,123 @@ class FTCodeDetectorNFA():
                 continue
 
             if content.strip() == FTCodeDetectorConst.COMMENT_BEGIN:
-                if self.state == FTCodeDetectorNFAState.STATE_INITIAL:
-                    self.state = FTCodeDetectorNFAState.STATE_COMMENT_BEGIN
-
-                    model: FTCodeDetectorModel = FTCodeDetectorModel()
-                    model.start_line = line + 1
-                    model.abs_path = file
-                    model.source_file = FTCodeDetectorFileManager.get_file_name(file)
-                    model.source_lines.append((line + 1, content))
-                
-                    self.stack.push(model)
-                
-                elif self.state == FTCodeDetectorNFAState.STATE_COMMENT_NORMAL_CODE:
-                    self.state = FTCodeDetectorNFAState.STATE_COMMENT_END_BEGIN
-
-                    self.add_line_if_state_correct((line + 1, content))
+                self.stateStack.push(FTCodeDetectorNFAState.STATE_COMMENT_BEGIN)
 
             elif content.strip() == FTCodeDetectorConst.COMMENT_END:
-                if self.state == FTCodeDetectorNFAState.STATE_COMMENT_END_END:
-                    self.state = FTCodeDetectorNFAState.STATE_ACCEPT
+                if self.stateStack.top == FTCodeDetectorNFAState.STATE_COMMENT_END_END:
+                    self.stateStack.top = FTCodeDetectorNFAState.STATE_ACCEPT
                     
-                    self.add_line_if_state_correct((line + 1, content))
-                    self.stack.top.end_line = line + 1
+                    self.add_line_if_needed((line + 1, content))
+                    self.modelStack.top.end_line = line + 1
 
-                    models.append(self.stack.top)
-                    self.stack.pop()
+                    topModel = self.modelStack.top
+                    models.append(topModel)
+
+                    self.modelStack.pop()
+                    self.modelStack.top.source_lines.extend(topModel.source_lines) if self.modelStack.empty == False else None
+
+                    self.stateStack.pop()
                 
-                elif self.state == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_CONTENT or self.state == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_BEGIN:
-                    self.state = FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_CLOSE
+                elif self.stateStack.top == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_CONTENT or self.stateStack.top == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_BEGIN:
+                    self.stateStack.top = FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_END
 
-                    self.add_line_if_state_correct((line + 1, content))
+                    self.add_line_if_needed((line + 1, content))
 
-                elif self.state == FTCodeDetectorNFAState.STATE_INITIAL:
-                    self.stack.pop()
+                elif self.stateStack.top == FTCodeDetectorNFAState.STATE_COMMENT_NORMAL_CODE:
+                    self.add_line_if_needed((line + 1, content))
+
+                elif self.stateStack.top == FTCodeDetectorNFAState.STATE_INITIAL:
+                    self.modelStack.pop()
 
             elif content.strip() == FTCodeDetectorConst.START_MARCO:
-                if self.state == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN:
-                    self.state = FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_BEGIN
-                    self.add_line_if_state_correct((line + 1, content))
+                if self.stateStack.top == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN:
+                    self.stateStack.top = FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_BEGIN
+
+                    model: FTCodeDetectorModel = FTCodeDetectorModel()
+                    model.start_line = line
+                    model.abs_path = file
+                    model.source_file = FTCodeDetectorFileManager.get_file_name(file)
+                
+                    self.modelStack.push(model)
+
+                    prevLine = lines[line - 1] if (line - 1) < len(lines) else None
+                    
+                    self.add_line_if_needed((line, prevLine))
+                    self.add_line_if_needed((line + 1, content))
 
             elif content.strip() == FTCodeDetectorConst.END_MARCO:
-                if self.state == FTCodeDetectorNFAState.STATE_COMMENT_END_BEGIN:
-                    self.state = FTCodeDetectorNFAState.STATE_COMMENT_END_END
-                    self.add_line_if_state_correct((line + 1, content))
+                self.stateStack.pop()
 
-                elif self.state == FTCodeDetectorNFAState.STATE_NORMAL_CODE:
-                    self.state = FTCodeDetectorNFAState.STATE_INITIAL
+                if self.stateStack.top == FTCodeDetectorNFAState.STATE_NORMAL_CODE:
+                    self.stateStack.top = FTCodeDetectorNFAState.STATE_INITIAL
+                
+                else:
+                    self.stateStack.top = FTCodeDetectorNFAState.STATE_COMMENT_END_END
+                    self.add_line_if_needed((line + 1, content))
 
             else:
 
-                if self.state == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_BEGIN or self.state == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_CONTENT:
-                    self.state = FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_CONTENT
+                if self.stateStack.top == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_BEGIN or self.stateStack.top == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_CONTENT:
+                    self.stateStack.top = FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_CONTENT
 
                     matchs = regex.match(content.strip())
                     groups = matchs.groups() if matchs != None else None
 
                     if groups == None:
-                        self.state = FTCodeDetectorNFAState.STATE_ERROR
+                        self.stateStack.top = FTCodeDetectorNFAState.STATE_ERROR
                         return None
 
-                    self.add_line_if_state_correct((line + 1, content))
+                    self.add_line_if_needed((line + 1, content))
 
                     marco: FTCodeDetectorMarco = self.add_marco(groups)
 
                     if groups[0] == FTCodeDetectorConst.BUSINESS_MARCO:
                         marco.update_type(FTCodeDetectorConst.FEILD_TYPE_SINGLE)    
-                        self.stack.top.business_marco = marco
+                        self.modelStack.top.business_marco = marco
                         continue
                     
                     elif groups[0] == FTCodeDetectorConst.PRINCIPAL_MARCO:
                         marco.update_type(FTCodeDetectorConst.FIELD_TYPE_PERSON)
-                        self.stack.top.principal_marco = marco
+                        self.modelStack.top.principal_marco = marco
                         continue
 
-                    self.stack.top.user_defined.append(marco)
+                    self.modelStack.top.user_defined.append(marco)
 
                 else:
 
-                    if self.state == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_CLOSE or \
-                            self.state == FTCodeDetectorNFAState.STATE_COMMENT_END_BEGIN or \
-                                self.state == FTCodeDetectorNFAState.STATE_COMMENT_NORMAL_CODE:
+                    if self.stateStack.top == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN_END or \
+                                self.stateStack.top == FTCodeDetectorNFAState.STATE_COMMENT_NORMAL_CODE:
                         
-                        self.add_line_if_state_correct((line + 1, content))
-                        self.stack.top.text_lines.append(content)
-
-                        self.state = FTCodeDetectorNFAState.STATE_COMMENT_NORMAL_CODE
+                        self.add_line_if_needed((line + 1, content))
+                        self.stateStack.top = FTCodeDetectorNFAState.STATE_COMMENT_NORMAL_CODE
 
                     else:
 
-                        if self.state == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN or self.state == FTCodeDetectorNFAState.STATE_NORMAL_CODE:
-                            self.state = FTCodeDetectorNFAState.STATE_NORMAL_CODE
+                        if self.stateStack.top == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN or self.stateStack.top == FTCodeDetectorNFAState.STATE_NORMAL_CODE:
+                            if self.stateStack.top == FTCodeDetectorNFAState.STATE_COMMENT_BEGIN:
+                                prevLine = lines[line - 1] if (line - 1) < len(lines) else None
+                                self.add_line_if_needed((line, prevLine))
+
+                            self.stateStack.pop()
+                            self.add_line_if_needed((line + 1, content))
+
+                        elif self.stateStack.top == FTCodeDetectorNFAState.STATE_COMMENT_NORMAL_CODE:
+                            self.add_line_if_needed((line + 1, content))
+
                         else:
-                            self.state = FTCodeDetectorNFAState.STATE_INITIAL
+                            if self.stateStack.empty == False:
+                                self.stateStack.top = FTCodeDetectorNFAState.STATE_INITIAL
 
-                        self.stack.pop()
-
-        if self.state == FTCodeDetectorNFAState.STATE_COMMENT_NORMAL_CODE:
-            self.state = FTCodeDetectorNFAState.STATE_ACCEPT
+        if self.stateStack.top == FTCodeDetectorNFAState.STATE_COMMENT_NORMAL_CODE:
+            self.stateStack.top = FTCodeDetectorNFAState.STATE_ACCEPT
             
-            self.add_line_if_state_correct((len(lines), lines[-1]))
-            self.stack.top.end_line = len(lines)
+            self.add_line_if_needed((len(lines), lines[-1]))
+            self.modelStack.top.end_line = len(lines)
 
-            models.append(self.stack.top)
-            self.stack.pop()
-        
+            models.append(self.modelStack.top)
+            self.modelStack.pop()
+
+            self.stateStack.top = self.stateStack.top
+            self.stateStack.pop()
+
         return models

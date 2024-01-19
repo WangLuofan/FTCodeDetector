@@ -181,7 +181,7 @@ class FTCodeDetector():
                 FTCodeDetectorConst.SOURCE_LINE_DESC: '{start} ~ {end}'.format(start = model.start_line, end = model.end_line),
                 FTCodeDetectorConst.PLATFORM_DESC: FTCodeDetectorConfig.platform,
                 FTCodeDetectorConst.BUSINESS_DESC: model.business_marco.value,
-                FTCodeDetectorConst.CODEFRAG_DESC: ''.join(s for s in model.text_lines),
+                FTCodeDetectorConst.CODEFRAG_DESC: ''.join(s[1] for s in model.source_lines),
                 FTCodeDetectorConst.DIGEST_DESC: model.hexdigest,
             }
 
@@ -312,7 +312,7 @@ class FTCodeDetector():
                 file.table_id[business_type] = feiShuRequester.create_table(file, business_model.business_desc, all_fields)
                 feiShuRequester.delete_table(file.token, default_table_id)
 
-                self.update_config(file, business_type)
+                self.update_config(file, business_model)
 
             elif business_config.table_id == None:
                 file.table_id[business_type] = feiShuRequester.create_table(file, business_model.business_desc, all_fields)
@@ -380,7 +380,6 @@ class FTCodeDetector():
             return True
         
         feiShuRequester = FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorConfig.FEISHU_APP_ID, FTCodeDetectorConfig.FEISHU_APP_SECRET)
-        # feiShuRequester.delete_all_files()
 
         file: FTCodeDetectorFeiShuBitableFile = self.create_file_or_table_if_needed(feiShuRequester, business_dict)
         if file == None:

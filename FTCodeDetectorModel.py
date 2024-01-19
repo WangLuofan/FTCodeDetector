@@ -78,15 +78,13 @@ class FTCodeDetectorModel():
         self.source_file = None
         self.source_lines = []
 
-        self.text_lines = []
-        
         self.user_defined: [FTCodeDetectorMarco] = []
 
     @property
     def hexdigest(self) -> str:
         text: str = self.source_file \
             .join(self.business_marco.value if self.business_marco != None else FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN) \
-                .join(text for text in self.text_lines)
+                .join(text[1] for text in self.source_lines)
         
         return FTCodeDetectorHelper.FTCodeDetectorHelper.md5(text)
 
