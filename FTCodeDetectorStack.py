@@ -39,11 +39,15 @@ class FTCodeDetectorStack():
         
         self.stack.append(value)
 
-    def pop(self):
+    def pop(self) -> Any:
         if self.empty:
             return
         
+        top = self.top
+        
         self.stack.pop()
+
+        return top
 
     def clear(self):
         if self.empty:

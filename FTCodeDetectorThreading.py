@@ -10,6 +10,7 @@ from FTCodeDetectorNFA import FTCodeDetectorNFA
 class FTCodeDetectorThreading(threading.Thread):
     def __init__(self, files: [str], thread_lock: threading.Lock, result: [FTCodeDetectorModel]):
         threading.Thread.__init__(self)
+        
         self.result = result
         self.files = files
         self.thread_lock = thread_lock

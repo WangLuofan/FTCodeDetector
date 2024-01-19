@@ -43,15 +43,22 @@ class FTCodeDetectorConfig():
     def __init__(self):
         self.FEISHU_APP_ID = None
         self.FEISHU_APP_SECRET = None
+
         self.FTOA_APP_KEY = None
         self.FTOA_APP_SEC = None
+
         self.file_manager = None
+        
         self.chat_group = None
+
         self.platform = None
+
         self.message_card_id = None
+
         self.file_token = None
         self.file_url = None
         self.file_name = FTCodeDetectorConst.DEFAULT_FILE_NAME
+
         self.business: dict = {}
 
         self.load_config()
@@ -150,7 +157,7 @@ class FTCodeDetectorConfig():
 
             if item.table_id != None and len(item.table_id) > 0:
                 business_contents['table_id'] = item.table_id
-                
+
             if item.file_url != None and len(item.file_url) > 0:
                 business_contents['file_url'] = item.file_url
 

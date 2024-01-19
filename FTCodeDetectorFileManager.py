@@ -28,11 +28,14 @@ class FTCodeDetectorFileManager():
 
     def is_valid_file(self, path: str):
         ext = self.get_file_extension(path)
+        
         if len(ext) <= 0:
             return False
+        
         for e in self.extensions:
             if e == ext:
                 return True
+
         return False
 
     def get_source_files(self):
