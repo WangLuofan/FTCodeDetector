@@ -48,7 +48,7 @@ class FTCodeDetectorConfig():
         self.FTOA_APP_SEC = None
 
         self.file_manager = None
-        
+
         self.chat_group = None
 
         self.platform = None
@@ -126,6 +126,22 @@ class FTCodeDetectorConfig():
                 business = FTCodeDetectorBusinessConfig(business_type, item)
                 self.business[business_type] = business
 
+    def restore_config(self, config_file: str = 'config.json'):
+        contents: dict = {
+            'feishu_app_id': self.FEISHU_APP_ID,
+            'feishu_app_secret': self.FEISHU_APP_SECRET,
+            'ftoa_app_key': self.FTOA_APP_KEY,
+            'ftoa_app_sec': self.FTOA_APP_SEC,
+            'platform': self.platform if self.platform != None else 'Unknown',
+        }
+
+        if self.message_card_id != None and len(self.message_card_id) > 0:
+            contents['message_card_id'] = self.message_card_id
+        
+        with open(config_file, "w") as f:
+            jstr = json.dumps(contents, indent = 4)
+            f.write(jstr)
+
     def save_config(self, config_file: str = 'config.json'):
 
         contents: dict = {
@@ -169,7 +185,7 @@ class FTCodeDetectorConfig():
         contents['business'] = business
 
         with open(config_file, "w") as f :
-            jstr = json.dumps(contents, indent=3)
+            jstr = json.dumps(contents, indent = 4)
             f.write(jstr)
 
 if __name__ == 'FTCodeDetectorConfig':

@@ -29,6 +29,7 @@ class FTCodeDetector():
         print()
         print('*******************************')
         print('Usage: python ./FTCodeDetector \{arguments\}')
+        print('--clear:', 'Clean all Project Files. BE CAREFUL')
         print('-d:', 'Specify The Project Directory')
         print('-e:', 'Specify The Files Extensions to Detect, \',\' for split')
         print('*******************************')
@@ -62,6 +63,8 @@ class FTCodeDetector():
 
         if self.parse_arg() == False:
             return
+
+        self.do_clear_if_needed()
 
         if len(self.directory) == 0 or len(self.ext) == 0:
             return
@@ -392,6 +395,16 @@ class FTCodeDetector():
             self.send_message(business_dict)
 
         return True
+
+    def do_clear_if_needed(self):
+        if '--clear' not in sys.argv:
+            return
+        
+        feiShuRequester = FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorConfig.FEISHU_APP_ID, FTCodeDetectorConfig.FEISHU_APP_SECRET)
+        feiShuRequester.delete_all_files()
+
+        FTCodeDetectorConfig.restore_config()
+        FTCodeDetectorConfig.load_config()
 
     def print(self, business_dict: dict):
         if len(business_dict) <= 0:
