@@ -42,8 +42,7 @@ class FTCodeDetectorNFA():
         if len(groups) <= 0:
             return None
         
-        marco = FTCodeDetectorMarco(groups[0] if groups[0] != None and len(groups[0]) > 0 else FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN, \
-                                    groups[2] if groups[2] != None and len(groups[2]) > 0 else FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN_DESC)
+        marco = FTCodeDetectorMarco(groups[0])
 
         if groups[1] != None and len(groups[1]) > 2:
             marco.parse_attributes(groups[1])
@@ -139,18 +138,20 @@ class FTCodeDetectorNFA():
 
                     self.add_line_if_needed((line + 1, content))
 
-                    marco: FTCodeDetectorMarco = self.add_marco(groups)
 
                     if groups[0] == FTCodeDetectorConst.BUSINESS_MARCO:
+                        marco: FTCodeDetectorMarco = self.add_marco(groups, groups[2])
                         marco.update_type(FTCodeDetectorConst.FEILD_TYPE_SINGLE)    
                         self.modelStack.top.business_marco = marco
                         continue
                     
                     elif groups[0] == FTCodeDetectorConst.PRINCIPAL_MARCO:
+                        marco: FTCodeDetectorMarco = self.add_marco(groups)
                         marco.update_type(FTCodeDetectorConst.FIELD_TYPE_PERSON)
                         self.modelStack.top.principal_marco = marco
                         continue
 
+                    marco: FTCodeDetectorMarco = self.add_marco(groups)
                     self.modelStack.top.user_defined.append(marco)
 
                 else:

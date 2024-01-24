@@ -19,21 +19,23 @@ class FTCodeDetectorGitHelper():
         return basename
 
     @staticmethod
+    def git_version() -> str:
+        git_version = subprocess.Popen(['git', '--version'], shell = False, stdout = subprocess.PIPE) \
+            .stdout.readline().decode('utf-8') \
+                .strip()
+        return git_version
+
+    @staticmethod
     def get_file_url(path: str) -> str:
         file_url: str = None
         if path == None or len(path) <= 0 \
             or os.path.exists(path) == False:
             return file_url
         
-        check_git = subprocess.call(['git', '--version'], shell=False)
-
-        if check_git != 0:
-            return file_url
-        
         cur_dir = os.getcwd()
         os.chdir(FTCodeDetectorFileManager.get_file_path(path))
         
-        file_url = subprocess.Popen(['git', 'remote', 'get-url', 'origin', '--push'], shell=False, stdout=subprocess.PIPE) \
+        file_url = subprocess.Popen(['git', 'remote', 'get-url', 'origin', '--push'], shell = False, stdout = subprocess.PIPE) \
             .stdout.readline().decode('utf-8') \
                 .strip()
         

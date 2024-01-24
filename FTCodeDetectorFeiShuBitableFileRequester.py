@@ -172,7 +172,7 @@ class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester
 
         if not response.success():
             lark.logger.error(
-                f"client.bitable.v1.app_table_record.batch_create failed, code: {response.code}, msg: {response.msg}, log_id: {response.get_log_id()}")
+                f"client.bitable.v1.app_table_record.batch_create failed, code: {response.code}, msg: {response.msg}, log_id: {response.get_log_id()}, contents: {response.raw.content.decode('utf-8')}")
             return False
 
         lark.logger.info(lark.JSON.marshal(response.data, indent=4))
