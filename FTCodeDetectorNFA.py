@@ -42,9 +42,12 @@ class FTCodeDetectorNFA():
         if len(groups) <= 0:
             return None
         
-        marco = FTCodeDetectorMarco(groups[0])
+        marco = FTCodeDetectorMarco(groups[0] if groups[0] != None and len(groups[0]) > 0 else FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN, \
+                                    groups[2] if groups[2] != None and len(groups[2]) > 0 else FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN_DESC)
+
         if groups[1] != None and len(groups[1]) > 2:
             marco.parse_attributes(groups[1])
+
         marco.value = groups[2]
 
         if desc != None and len(desc) > 0:

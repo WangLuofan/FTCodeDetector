@@ -6,13 +6,14 @@ import FTCodeDetectorHelper
 from FTCodeDetectorConstDefine import *
 
 class FTCodeDetectorMarco():
-    def __init__(self, tag: str):
+    def __init__(self, tag: str, desc: str = FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN_DESC, value: str = FTCodeDetectorConst.BUSINESS_TYPE_UNKNOWN):
         self.tag = tag
         self.attributes = {
             'type': 'text',
-            'desc': tag
+            'desc': desc
         }
-        self.value = None
+
+        self.value = value
 
     def get_type(self) -> str:
         if 'type' in self.attributes:

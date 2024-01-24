@@ -296,9 +296,7 @@ class FTCodeDetector():
 
         if file == None:
             return None
-        
-        self.add_manager_perm(feiShuRequester, file)
-        
+                
         return (file, default_table_id)
 
     def create_file_or_table_if_needed(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester, business_dict: dict) -> FTCodeDetectorFeiShuBitableFile:
@@ -384,10 +382,13 @@ class FTCodeDetector():
             return True
         
         feiShuRequester = FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorConfig.FEISHU_APP_ID, FTCodeDetectorConfig.FEISHU_APP_SECRET)
+        feiShuRequester.delete_all_files()
 
         file: FTCodeDetectorFeiShuBitableFile = self.create_file_or_table_if_needed(feiShuRequester, business_dict)
         if file == None:
             return False
+
+        self.add_manager_perm(feiShuRequester, file)
         
         for (_, business_model) in business_dict.items():
             self.append_or_update_records(feiShuRequester, file, business_model)
@@ -475,4 +476,4 @@ if __name__ == '__main__':
     codeDetector: FTCodeDetector = FTCodeDetector()
 
     codeDetector.print(codeDetector.run())
-    FTCodeDetectorConfig.save_config()
+    # FTCodeDetectorConfig.save_config()

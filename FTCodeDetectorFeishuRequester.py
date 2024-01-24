@@ -11,6 +11,7 @@ class FTCodeDetectorFeiShuRequester():
     def __init__(self, app_id: str, app_secret: str):
         self.app_id = app_id
         self.app_secret = app_secret
+
         self.client = lark.Client.builder().app_id(app_id).app_secret(app_secret).enable_set_token(True).log_level(lark.LogLevel.DEBUG).build()
 
         self.tenant_access_token = self.refresh_tenant_access_token()

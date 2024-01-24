@@ -18,7 +18,7 @@ class _const:
 
         if not __name.isupper():
             raise self.ConstCaseError('const name %s is not all uppercase' % __name)
-        
+
         self.__dict__[__name] = __value
 
 sys.modules[__name__] = _const() 

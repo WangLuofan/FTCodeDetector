@@ -26,6 +26,7 @@ class FTCodeDetectorHttpRequester():
     @staticmethod
     def PUT(url, request_headers, data) -> FTCodeDetectorHttpResponse:
         resp = requests.put(url, headers=request_headers, data=data)
+
         if resp == None or resp.text == None:
             return
 
@@ -40,6 +41,7 @@ class FTCodeDetectorHttpRequester():
     @staticmethod
     def POST(url, request_headers, data) -> FTCodeDetectorHttpResponse:
         resp = requests.post(url=url, headers=request_headers, data=data)
+
         if resp == None or resp.text == None:
             return None
 
