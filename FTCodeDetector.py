@@ -484,4 +484,4 @@ if __name__ == '__main__':
     codeDetector: FTCodeDetector = FTCodeDetector()
 
     codeDetector.print(codeDetector.run())
-    # FTCodeDetectorConfig.save_config()
+    FTCodeDetectorConfig.save_config()
