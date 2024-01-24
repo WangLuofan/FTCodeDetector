@@ -382,7 +382,6 @@ class FTCodeDetector():
             return True
         
         feiShuRequester = FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorConfig.FEISHU_APP_ID, FTCodeDetectorConfig.FEISHU_APP_SECRET)
-        feiShuRequester.delete_all_files()
 
         file: FTCodeDetectorFeiShuBitableFile = self.create_file_or_table_if_needed(feiShuRequester, business_dict)
         if file == None:
@@ -476,4 +475,4 @@ if __name__ == '__main__':
     codeDetector: FTCodeDetector = FTCodeDetector()
 
     codeDetector.print(codeDetector.run())
-    # FTCodeDetectorConfig.save_config()
+    FTCodeDetectorConfig.save_config()
