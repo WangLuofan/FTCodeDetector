@@ -79,6 +79,9 @@ class FTCodeDetector():
         slice = int(len(source_files) / cpu_count) + 1
         cpu_usage = int(len(source_files) / slice) + (1 if len(source_files) % slice != 0 else 0)
 
+        progress: FTCodeDetectorProgressBar = FTCodeDetectorProgressBar(maxval = len(source_files))
+        progress_lock = threading.Lock()
+
         threads = []
         thread_lock = threading.Lock()
         for i in range(0, cpu_usage):
@@ -87,12 +90,14 @@ class FTCodeDetector():
                 break
             files = source_files[start : start + slice]
 
-            thread = FTCodeDetectorThreading(files, thread_lock, result)
+            thread = FTCodeDetectorThreading(files, thread_lock, result, lambda :(progress_lock.acquire(), progress.update(), progress_lock.release()))
             threads.append(thread)
 
         for t in threads:
             t.start()
             t.join()
+
+        progress.finish()
 
         business_dict = self.do_categorize(result)
         self.feishu(business_dict)
@@ -229,10 +234,10 @@ class FTCodeDetector():
                     elif 'type' in marco.attributes:
                         if marco.attributes['type'] == FTCodeDetectorConst.FIELD_TYPE_DATETIME:
                             try:
-                                date = datetime.strptime(marco.value, r'%Y/%m/%d')
+                                date = datetime.datetime.strptime(marco.value, r'%Y/%m/%d')
                             except ValueError:
-                                ctime = datetime.now()
-                                date = datetime.strptime('{year}/{month}/{day}'.format(year = ctime.year, month = ctime.month, day = ctime.day), r'%Y/%m/%d')
+                                ctime = datetime.datetime.now()
+                                date = datetime.datetime.strptime('{year}/{month}/{day}'.format(year = ctime.year, month = ctime.month, day = ctime.day), r'%Y/%m/%d')
 
                             fields[marco.attributes['desc']] = int(date.timestamp() * 1000)
 
@@ -360,7 +365,7 @@ class FTCodeDetector():
                                 len(model.principal_marco.value) > 0 else 'Unknown'
                         })
 
-        ctime = datetime.now()
+        ctime = datetime.datetime.now()
         payload = {
             'type': 'template',
             'data': {

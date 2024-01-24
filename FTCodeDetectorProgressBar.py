@@ -2,13 +2,18 @@
 # -*- coding:utf-8 -*-
 # @Author: cairowang
 
-from time import sleep
 from progressbar import *
 
 class FTCodeDetectorProgressBar():
     def __init__(self, hint: str = '扫描中: ', maxval: int = 100) -> None:
-        widgets = [hint, Percentage(), ' ', Bar('>>'), ' ', Timer(), ' ', ETA(), ' ']
+        widgets = [hint, Percentage(), ' ', Bar('>'), ' ', Timer(), ' ']
+
+        self.value = 0
         self.progress = progressbar.ProgressBar(maxval = maxval, widgets = widgets).start()
     
-    def update(self, value: int):
-        self.progress.update(value)
+    def update(self):
+        self.value = self.value + 1
+        self.progress.update(self.value)
+
+    def finish(self):
+        self.progress.finish()
