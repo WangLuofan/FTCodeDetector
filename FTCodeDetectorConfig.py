@@ -137,6 +137,9 @@ class FTCodeDetectorConfig():
 
         if self.message_card_id != None and len(self.message_card_id) > 0:
             contents['message_card_id'] = self.message_card_id
+
+        if self.file_manager != None and len(self.file_manager) > 0:
+            contents['file_manager'] = self.file_manager
         
         with open(config_file, "w") as f:
             jstr = json.dumps(contents, indent = 4)

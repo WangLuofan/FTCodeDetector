@@ -65,7 +65,7 @@ class FTCodeDetector():
         if self.parse_arg() == False:
             return
 
-        self.do_clear_if_needed()
+        self.do_clean_if_needed()
 
         if len(self.directory) == 0 or len(self.ext) == 0:
             return
@@ -121,7 +121,7 @@ class FTCodeDetector():
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.FILE_DESC, FTCodeDetectorConst.FIELD_TYPE_LINK))
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.SOURCE_LINE_DESC, FTCodeDetectorConst.FIELD_TYPE_TEXT))
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.PLATFORM_DESC, FTCodeDetectorConst.FEILD_TYPE_SINGLE))
-        fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.DEPARTMENT_DESC, FTCodeDetectorConst.FEILD_TYPE_SINGLE))
+        # fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.DEPARTMENT_DESC, FTCodeDetectorConst.FEILD_TYPE_SINGLE))
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.BUSINESS_DESC, FTCodeDetectorConst.FEILD_TYPE_SINGLE))
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.PRINCIPAL_DESC, FTCodeDetectorConst.FIELD_TYPE_PERSON))
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.CODEFRAG_DESC, FTCodeDetectorConst.FIELD_TYPE_TEXT))
@@ -213,9 +213,11 @@ class FTCodeDetector():
             if model.principal_marco != None and model.principal_marco.value != None:
                 fields[FTCodeDetectorConst.HANDLED_DESC] = FTCodeDetectorConst.HANDLED_RESULT_NO
 
-                department_name: str = self.get_user_department(model.principal_marco.value)
-                if department_name != None:
-                    fields[FTCodeDetectorConst.DEPARTMENT_DESC] = department_name
+                # department_name: str = self.get_user_department(model.principal_marco.value)
+                # if department_name != None and len(department_name) > 0:
+                #     fields[FTCodeDetectorConst.DEPARTMENT_DESC] = department_name
+                # elif 'module' in model.user_defined and model.user_defined['module'] != None:
+                #     fields[FTCodeDetectorConst.DEPARTMENT_DESC] = FTCodeDetectorConfig.Platform + model.user_defined['module'].value
 
                 feishuId = self.get_feishu_id(model.principal_marco.value)
                 if feishuId != None:
@@ -412,7 +414,7 @@ class FTCodeDetector():
 
         return True
 
-    def do_clear_if_needed(self):
+    def do_clean_if_needed(self):
         if '--clean' not in sys.argv:
             return
         
