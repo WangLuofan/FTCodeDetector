@@ -482,10 +482,7 @@ class FTCodeDetector():
 
 
 if __name__ == '__main__':
-    # codeDetector: FTCodeDetector = FTCodeDetector()
+    codeDetector: FTCodeDetector = FTCodeDetector()
 
-    # codeDetector.print(codeDetector.run())
-    # FTCodeDetectorConfig.save_config()
-
-    progress = FTCodeDetectorProgressBar()
-    progress.update()
+    codeDetector.print(codeDetector.run())
+    FTCodeDetectorConfig.save_config()
