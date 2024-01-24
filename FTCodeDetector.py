@@ -16,6 +16,7 @@ from FTCodeDetectorModel import *
 from FTCodeDetectorGitHeper import *
 from FTCodeDetectorFtoaRequester import FTCodeDetectorFtoaRequester
 from FTCodeDetectorFeiShuFile import *
+from FTCodeDetectorProgressBar import *
 from FTCodeDetectorThreading import FTCodeDetectorThreading
 from FTCodeDetectorFileManager import FTCodeDetectorFileManager
 from FTCodeDetectorFeiShuChatRequester import FTCodeDetectorFeiShuChatRequester
@@ -481,7 +482,10 @@ class FTCodeDetector():
 
 
 if __name__ == '__main__':
-    codeDetector: FTCodeDetector = FTCodeDetector()
+    # codeDetector: FTCodeDetector = FTCodeDetector()
 
-    codeDetector.print(codeDetector.run())
-    FTCodeDetectorConfig.save_config()
+    # codeDetector.print(codeDetector.run())
+    # FTCodeDetectorConfig.save_config()
+
+    progress = FTCodeDetectorProgressBar()
+    progress.update()

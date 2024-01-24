@@ -4,19 +4,10 @@
     "ftoa_app_key": "5fba41da7c5e5db3327fe3d31228e5cc",
     "ftoa_app_sec": "2c0cbab50583a1c777eebe1c61124417",
     "platform": "iOS",
-    "file_name": "\u4e1a\u52a1\u4ee3\u7801\u626b\u63cf",
-    "file_token": "IuLmbDrqAaZE62smSXJc8dhrnFh",
     "message_card_id": "ctp_AAyuu48Zmctz",
     "chat_group": "机器人测试",
-    "file_url": "https://futu.feishu.cn/base/IuLmbDrqAaZE62smSXJc8dhrnFh",
     "file_manager": [
        "cairowang",
        "bruceli"
-    ],
-    "business": {
-       "expire": {
-          "table_id": "tblJvYahQfywmdq2",
-          "file_url": "https://futu.feishu.cn/base/IuLmbDrqAaZE62smSXJc8dhrnFh?table={'refactor': 'tblwN3tTo37g0lxt', 'diff': 'tblt34wCFShe0Gw9', 'expire': 'tblJvYahQfywmdq2'}"
-       }
-    }
+    ]
  }
