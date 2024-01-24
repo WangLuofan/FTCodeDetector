@@ -172,8 +172,9 @@ class FTCodeDetector():
         all_records: [FTCodeDetectorFeiShuBitableRecord] = feiShuRequester.list_records(file, file.table_id[business_model.business_type])
         all_records_dict: {str: [FTCodeDetectorFeiShuBitableRecord]} = {}
 
-        for item in all_records:
-            all_records_dict[item.hexdigest] = item
+        if all_records != None and len(all_records) > 0:
+            for item in all_records:
+                all_records_dict[item.hexdigest] = item
 
         recordsToAppend: [AppTableRecord] = []
         recordsToUpdate: [FTCodeDetectorFeiShuBitableRecord] = []
