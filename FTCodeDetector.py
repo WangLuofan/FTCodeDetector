@@ -293,7 +293,7 @@ class FTCodeDetector():
             return
         
         for manager in FTCodeDetectorConfig.file_manager:
-            feiShuRequester.add_member_perm(manager, file, FTCodeDetectorConst.FILE_PERM_EDIT)
+            feiShuRequester.add_member_perm(manager, file, FTCodeDetectorConst.FILE_PERM_FULLACCESS)
 
     def update_config(self, file: FTCodeDetectorFeiShuFile, business_model: FTCodeDetectorBusinessModel):
         if file == None or business_model == None:

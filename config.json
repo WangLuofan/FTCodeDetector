@@ -4,10 +4,10 @@
     "ftoa_app_key": "5fba41da7c5e5db3327fe3d31228e5cc",
     "ftoa_app_sec": "2c0cbab50583a1c777eebe1c61124417",
     "platform": "iOS",
-    "message_card_id": "ctp_AAyuu48Zmctz",
     "file_manager": [
         "lokerwu",
         "bruceli",
         "cairowang"
-    ]
+    ],
+    "message_card_id": "ctp_AAyuu48Zmctz"
 }
