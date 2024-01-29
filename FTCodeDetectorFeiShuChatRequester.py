@@ -40,18 +40,22 @@ class FTCodeDetectorFeiShuChatRequester(FTCodeDetectorFeiShuRequester):
 
     def send_message(self, group_name: str = None, payload = None) -> bool:
 
+        if payload == None or len(payload) == 0:
+            return False
+
         chat_ids = self.all_chat_id()
         if chat_ids == None or len(chat_ids) <= 0:
-            return
+            return False
 
         if group_name != None and len(group_name) > 0:
             for chat_id in chat_ids:
                 if chat_id.name == group_name:
                     if self.send_message_(chat_id, payload) == True:
                         lark.logger.info('消息已成功发送到\'{name}\''.format(name = group_name))
-                    else:
-                        lark.logger.error('给\'{name}\'发送消息失败'.format(name = group_name))
-                    return
+                        return True
+                    
+                    lark.logger.error('给\'{name}\'发送消息失败'.format(name = group_name))
+                    return False
         else:
             result: bool = True
             for chat_id in chat_ids:

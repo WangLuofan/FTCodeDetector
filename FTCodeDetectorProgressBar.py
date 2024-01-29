@@ -17,8 +17,10 @@ class FTCodeDetectorProgressBar():
         self.value = self.value + 1
 
         if self.hint_output == False:
-            print(self.hint, )
+            print(self.hint)
             self.hint_output = True
+
+            return
 
         self.progress.update(self.value)
 

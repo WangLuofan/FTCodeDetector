@@ -4,10 +4,45 @@
     "ftoa_app_key": "5fba41da7c5e5db3327fe3d31228e5cc",
     "ftoa_app_sec": "2c0cbab50583a1c777eebe1c61124417",
     "platform": "iOS",
+    "file_name": "\u4e1a\u52a1\u4ee3\u7801\u626b\u63cf",
+    "file_token": "UTIVbp0R1aJkUVsJfXNcTKYQnig",
+    "file_url": "https://futu.feishu.cn/base/UTIVbp0R1aJkUVsJfXNcTKYQnig",
     "file_manager": [
         "lokerwu",
         "bruceli",
         "cairowang"
     ],
-    "message_card_id": "ctp_AAyuu48Zmctz"
+    "message_card_id": "ctp_AAyuu48Zmctz",
+    "business": {
+        "iOS\u4e0eMac\u5dee\u5f02\u5316\u4ee3\u7801": {
+            "table_id": "tblCzAqU2UhzwCeO",
+            "file_url": "https://futu.feishu.cn/base/UTIVbp0R1aJkUVsJfXNcTKYQnig?table=tblCzAqU2UhzwCeO",
+            "business_desc": "iOS\u4e0eMac\u5dee\u5f02\u5316\u4ee3\u7801"
+        },
+        "\u5f85\u4f18\u5316\u4ee3\u7801": {
+            "table_id": "tbljQZtOvxlQkymN",
+            "file_url": "https://futu.feishu.cn/base/UTIVbp0R1aJkUVsJfXNcTKYQnig?table=tbljQZtOvxlQkymN",
+            "business_desc": "\u5f85\u4f18\u5316\u4ee3\u7801"
+        },
+        "\u725b\u725b\u548cMooMoo\u5dee\u5f02\u5316\u4e1a\u52a1": {
+            "table_id": "tblAe484iJGb6llS",
+            "file_url": "https://futu.feishu.cn/base/UTIVbp0R1aJkUVsJfXNcTKYQnig?table=tblAe484iJGb6llS",
+            "business_desc": "\u725b\u725b\u548cMooMoo\u5dee\u5f02\u5316\u4e1a\u52a1"
+        },
+        "\u6709\u65f6\u6548\u6027\u4e1a\u52a1": {
+            "table_id": "tblD9sjBZILqIs1r",
+            "file_url": "https://futu.feishu.cn/base/UTIVbp0R1aJkUVsJfXNcTKYQnig?table=tblD9sjBZILqIs1r",
+            "business_desc": "\u6709\u65f6\u6548\u6027\u4e1a\u52a1"
+        },
+        "\u5404\u7aef\u4e0d\u4e00\u81f4\u4ee3\u7801": {
+            "table_id": "tblCdmdPLQ1mZ370",
+            "file_url": "https://futu.feishu.cn/base/UTIVbp0R1aJkUVsJfXNcTKYQnig?table=tblCdmdPLQ1mZ370",
+            "business_desc": "\u5404\u7aef\u4e0d\u4e00\u81f4\u4ee3\u7801"
+        },
+        "Summary": {
+            "table_id": "tbl9ETktNPuVa3eZ",
+            "file_url": "https://futu.feishu.cn/base/UTIVbp0R1aJkUVsJfXNcTKYQnig?table=tbl9ETktNPuVa3eZ",
+            "business_desc": "Summary"
+        }
+    }
 }

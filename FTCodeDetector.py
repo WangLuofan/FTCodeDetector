@@ -17,6 +17,7 @@ from FTCodeDetectorGitHeper import *
 from FTCodeDetectorFtoaRequester import FTCodeDetectorFtoaRequester
 from FTCodeDetectorFeiShuFile import *
 from FTCodeDetectorProgressBar import *
+from FTCodeDetectorMessageCardModel import FTCodeDetectorBusinessMessageCardModel, FTCodeDetectorMessageCardModel, FTCodeDetectorScanResultMessageCardModel
 from FTCodeDetectorThreading import FTCodeDetectorThreading
 from FTCodeDetectorFileManager import FTCodeDetectorFileManager
 from FTCodeDetectorFeiShuChatRequester import FTCodeDetectorFeiShuChatRequester
@@ -173,14 +174,19 @@ class FTCodeDetector():
 
         return department['department']['name']
 
-    def append_or_update_records(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester, file: FTCodeDetectorFeiShuBitableFile, business_model: FTCodeDetectorBusinessModel) -> bool:
+    def append_or_update_records(self, feiShuRequester: FTCodeDetectorFeiShuBitableFileRequester, \
+                                 file: FTCodeDetectorFeiShuBitableFile, business_model: FTCodeDetectorBusinessModel, \
+                                    messageCardModel: FTCodeDetectorMessageCardModel) -> bool:
 
         all_records: [FTCodeDetectorFeiShuBitableRecord] = feiShuRequester.list_records(file, file.table_id[business_model.business_type])
+
         all_records_dict: {str: [FTCodeDetectorFeiShuBitableRecord]} = {}
+        records_deleted_dict: {str: [FTCodeDetectorFeiShuBitableRecord]} = {}
 
         if all_records != None and len(all_records) > 0:
             for item in all_records:
                 all_records_dict[item.hexdigest] = item
+                records_deleted_dict[item.hexdigest] = item
 
         recordsToAppend: [AppTableRecord] = []
         recordsToUpdate: [FTCodeDetectorFeiShuBitableRecord] = []
@@ -269,11 +275,12 @@ class FTCodeDetector():
                     all_records_dict[model.hexdigest].fields = fields
                     recordsToUpdate.append(all_records_dict[model.hexdigest])
 
-                all_records_dict.pop(model.hexdigest)
+                if model.hexdigest in records_deleted_dict:
+                    records_deleted_dict.pop(model.hexdigest)
             else:
                 recordsToAppend.append(AppTableRecord.builder().fields(fields).build())
 
-        for (_, item) in all_records_dict.items():
+        for item in records_deleted_dict: 
             item.fields = {FTCodeDetectorConst.HANDLED_DESC : FTCodeDetectorConst.HANDLED_RESULT_YES}
             recordsToUpdate.append(item)
 
@@ -285,6 +292,14 @@ class FTCodeDetector():
         if len(recordsToUpdate) > 0:
             feiShuRequester.update_records(file, file.table_id[business_model.business_type], recordsToUpdate)
             result = result or True
+
+        if business_model.business_type != FTCodeDetectorConst.SUMMARY_BUSINESS_TYPE:
+            busiMessageCardModel: FTCodeDetectorBusinessMessageCardModel = FTCodeDetectorBusinessMessageCardModel()
+            busiMessageCardModel.scan_busi_name = business_model.business_desc
+            busiMessageCardModel.scan_busi_total_count = len(business_model.models if business_model.models != None else [])
+            busiMessageCardModel.scan_busi_new_count = len(recordsToAppend)
+
+            messageCardModel.scan_result_business.append(busiMessageCardModel)
 
         return result
     
@@ -342,75 +357,51 @@ class FTCodeDetector():
         
         return file
 
-    def send_message(self, business_dict: dict):
-        extensions = ''
-        for (index, ext) in enumerate(self.ext):
-            if index != 0:
-                extensions = extensions + '|'
-            extensions += ext
-
-        url = 'https://futu.feishu.cn/base/{bitable_token}'.format(bitable_token = FTCodeDetectorConfig.file_token)
-
-        scan_result = []
-
-        item_count = min(3, len(business_dict[FTCodeDetectorConst.SUMMARY_BUSINESS_TYPE].models))
-        models: [FTCodeDetectorModel] = business_dict[FTCodeDetectorConst.SUMMARY_BUSINESS_TYPE].models
-
-        for idx in range(0, item_count):
-            model = models[idx]
-
-            scan_result.append({
-                            'scan_result_file': model.source_file,
-                            'scan_line_result': '{start} ~ {end}'.format(start = model.start_line + 1, end = model.end_line + 1),
-                            'scan_platform_result': FTCodeDetectorConfig.platform,
-                            'scan_principle_result': '<at email={principal}@futunn.com></at>'.format(principal = model.principal_marco.value) if model.principal_marco != None and \
-                                len(model.principal_marco.value) > 0 else 'Unknown'
-                        })
-
-        ctime = datetime.datetime.now()
-        payload = {
-            'type': 'template',
-            'data': {
-                'template_id': FTCodeDetectorConfig.message_card_id,
-                'template_variable': {
-                    'scan_date_time': '{year}-{month}-{day} {hour}:{minute}:{second}' \
-                        .format(year = '%04d' % ctime.year, 
-                                month = '%02d' % ctime.month, 
-                                day = '%02d' % ctime.day, 
-                                hour = '%02d' % ctime.hour, 
-                                minute = '%02d' % ctime.minute, 
-                                second = '%02d' % ctime.second),
-                    'scan_project_directory': self.directory,
-                    'scan_file_ext': extensions,
-                    'scan_count_result': str(len(models)),
-                    'scan_result': scan_result,
-                    'scan_result_sheets_url': url
-                }
-            }
-        }
+    def send_message(self, messageCardModel: FTCodeDetectorMessageCardModel):
+        if messageCardModel == None:
+            return
 
         chatRequester: FTCodeDetectorFeiShuChatRequester = FTCodeDetectorFeiShuChatRequester(FTCodeDetectorConfig.FEISHU_APP_ID, FTCodeDetectorConfig.FEISHU_APP_SECRET)
-        chatRequester.send_message(FTCodeDetectorConfig.chat_group, payload)
+        chatRequester.send_message(FTCodeDetectorConfig.chat_group, messageCardModel.payload())
 
     def feishu(self, business_dict: dict) -> bool:
 
         if len(business_dict) <= 0:
             return True
-        
+
         feiShuRequester = FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorConfig.FEISHU_APP_ID, FTCodeDetectorConfig.FEISHU_APP_SECRET)
-        feiShuRequester.delete_all_files
 
         file: FTCodeDetectorFeiShuBitableFile = self.create_file_or_table_if_needed(feiShuRequester, business_dict)
         if file == None:
             return False
 
         self.add_manager_perm(feiShuRequester, file)
+
+        messageCardModel: FTCodeDetectorMessageCardModel = FTCodeDetectorMessageCardModel()
+        messageCardModel.scan_project_directory = self.directory
+        messageCardModel.scan_file_ext = ','.join(self.ext)
         
         for (_, business_model) in business_dict.items():
-            self.append_or_update_records(feiShuRequester, file, business_model)
+            self.append_or_update_records(feiShuRequester, file, business_model, messageCardModel)
+
+        models: [FTCodeDetectorModel] = business_dict[FTCodeDetectorConst.SUMMARY_BUSINESS_TYPE].models
+
+        messageCardModel.scan_count_result = len(models if models != None else [])
+        messageCardModel.scan_result_sheets_url = 'https://futu.feishu.cn/base/{bitable_token}'. \
+            format(bitable_token = FTCodeDetectorConfig.file_token)
+        
+        for model in models:
+            scanResultModel: FTCodeDetectorScanResultMessageCardModel = FTCodeDetectorScanResultMessageCardModel()
+            scanResultModel.scan_result_file = model.source_file
+            scanResultModel.scan_line_result = '{start} ~ {end}'.format(start = model.start_line + 1, end = model.end_line + 1)
+            scanResultModel.scan_platform_result = FTCodeDetectorConfig.platform
+            scanResultModel.scan_principle_result = '<at email={principal}@futunn.com></at>'.format(principal = model.principal_marco.value) if model.principal_marco != None and \
+                                 len(model.principal_marco.value) > 0 else 'Unknown'
+            
+            messageCardModel.scan_result_item.append(scanResultModel)
 
         if FTCodeDetectorConfig.message_card_id != None and len(FTCodeDetectorConfig.message_card_id) >= 0:
-            self.send_message(business_dict)
+            self.send_message(messageCardModel)
 
         return True
 

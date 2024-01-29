@@ -21,9 +21,9 @@ class FTCodeDetectorNFAState(IntEnum):
     STATE_COMMENT_BEGIN_CONTENT = 4,
     STATE_COMMENT_BEGIN_END = 5,
     STATE_COMMENT_NORMAL_CODE = 6,
-    STATE_COMMENT_END_END = 8,
-    STATE_ACCEPT = 9,
-    STATE_ERROR = 10
+    STATE_COMMENT_END_END = 7,
+    STATE_ACCEPT = 8,
+    STATE_ERROR = 9
 
 class FTCodeDetectorNFA():
     def __init__(self):
