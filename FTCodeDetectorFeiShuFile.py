@@ -97,16 +97,32 @@ class FTCodeDetectorFeiShuBitableRecord():
                                     .build()
         return record
 
+class FTCodeDetectorFeiShuBitableFieldOption():
+    def __init__(self, name: str, color: int = None) -> None:
+        self.name: str = name
+        self.color = color
+
+    def bitableFieldOption(self) -> lark_oapi.bitable.v1.model.AppTableFieldPropertyOption:
+        op_builder: lark_oapi.bitable.v1.model.AppTableFieldPropertyOptionBuilder = lark_oapi.bitable.v1.model.AppTableFieldPropertyOption.builder()
+        
+        if self.name != None:
+            op_builder.name(self.name)
+
+        if self.color != None and self.color >= 0 and self.color <= 54:
+            op_builder.color(self.color)
+
+        return op_builder.build()
+
 class FTCodeDetectorFeiShuBitableField():
-    def __init__(self, title: str, type: str) -> None:
+    def __init__(self, title: str, type: str, options: [FTCodeDetectorFeiShuBitableFieldOption] = None) -> None:
         self.field_title = title
         self.field_type = type
+        self.field_options: [FTCodeDetectorFeiShuBitableFieldOption] = options
 
         self.__dict__[title] = type
 
     def __eq__(self, __value: object) -> bool:
         return self.field_title == __value.field_title
-
 
     def field_exist(self, title: str) -> bool:
         return title in self.__dict__

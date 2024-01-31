@@ -139,7 +139,12 @@ class FTCodeDetector():
                     fields_dic[marco.tag] = field
 
         fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.DIGEST_DESC, FTCodeDetectorConst.FIELD_TYPE_TEXT))
-        fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.HANDLED_DESC, FTCodeDetectorConst.FEILD_TYPE_SINGLE))
+        fields.append(FTCodeDetectorFeiShuBitableField(FTCodeDetectorConst.HANDLED_DESC, FTCodeDetectorConst.FEILD_TYPE_SINGLE, [
+            FTCodeDetectorFeiShuBitableFieldOption(FTCodeDetectorConst.HANDLED_RESULT_NONE),
+            FTCodeDetectorFeiShuBitableFieldOption(FTCodeDetectorConst.HANDLED_RESULT_NO),
+            FTCodeDetectorFeiShuBitableFieldOption(FTCodeDetectorConst.HANDLED_RESULT_YES),
+            FTCodeDetectorFeiShuBitableFieldOption(FTCodeDetectorConst.HANDLED_RESULT_IN)
+        ]))
 
         return fields
 

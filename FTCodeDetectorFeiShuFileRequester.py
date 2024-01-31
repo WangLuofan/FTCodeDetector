@@ -40,6 +40,7 @@ class FTCodeDetectorFeiShuFileRequester(FTCodeDetectorFeiShuRequester):
 
     def delete_all_files(self):
         files: dict = self.list_files()
+        
         for (_, file) in files.items():
             self.delete_file(file)
     

@@ -23,9 +23,10 @@ FTCodeDetectorConst.PRINCIPAL_DESC = '负责人'
 FTCodeDetectorConst.SUMMARY_BUSINESS_TYPE = 'Summary'
 FTCodeDetectorConst.SUMMARY_TABLE_NAME = '汇总信息'
 
-FTCodeDetectorConst.HANDLED_RESULT_YES = '已处理'
 FTCodeDetectorConst.HANDLED_RESULT_NO = '未处理'
-FTCodeDetectorConst.HANDLED_RESULT_NONE = '无需处理'
+FTCodeDetectorConst.HANDLED_RESULT_IN = '跟进中'
+FTCodeDetectorConst.HANDLED_RESULT_YES = '已完成'
+FTCodeDetectorConst.HANDLED_RESULT_NONE = '无需跟进'
 
 FTCodeDetectorConst.FIELD_TYPE_TEXT = 'text'
 FTCodeDetectorConst.FIELD_TYPE_LINK = 'link'

@@ -6,7 +6,6 @@ import lark_oapi as lark
 from lark_oapi.api.bitable.v1 import *
 
 from FTCodeDetectorFeiShuFile import *
-from FTCodeDetectorHttpRequester import FTCodeDetectorHttpRequester
 from FTCodeDetectorFeiShuFileRequester import FTCodeDetectorFeiShuFileRequester
 
 class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester):
@@ -113,6 +112,12 @@ class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester
 
     def create_field(self, file: FTCodeDetectorFeiShuBitableFile, table_id: str, field: FTCodeDetectorFeiShuBitableField):
 
+        bitable_options: [lark_oapi.bitable.v1.model.AppTableFieldPropertyOption] = None
+        if field.field_options != None and len(field.field_options) > 0:
+            bitable_options = []
+            for op in field.field_options:
+                bitable_options.append(op.bitableFieldOption())
+
         request: CreateAppTableFieldRequest = CreateAppTableFieldRequest.builder() \
             .app_token(file.token) \
             .table_id(table_id) \
@@ -120,6 +125,9 @@ class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester
                           .field_name(field.field_title)
                           .type(field.get_field_type())
                           .ui_type(field.get_field_ui_type())
+                          .property(AppTableFieldProperty.builder() 
+                                    .options(bitable_options) \
+                                        .build())
                           .build()) \
                     .build()
         
@@ -205,10 +213,23 @@ class FTCodeDetectorFeiShuBitableFileRequester(FTCodeDetectorFeiShuFileRequester
         
         headers: [AppTableCreateHeader] = []
         for field in fields:
-            header: AppTableCreateHeader = AppTableCreateHeader.builder() \
+            options: [lark_oapi.bitable.v1.AppTableFieldPropertyOption] = None
+            if field.field_options != None and len(field.field_options) > 0:
+                options = []
+                for op in field.field_options:
+                    options.append(op.bitableFieldOption())
+
+            header_builder: AppTableCreateHeaderBuilder = AppTableCreateHeader.builder() \
                 .field_name(field.field_title) \
-                .type(field.get_field_type()) \
-                .build()
+                .type(field.get_field_type())
+
+            if options != None:
+                header_builder.property(AppTableFieldProperty.builder() \
+                                        .options(options) \
+                                            .build())
+
+            header: AppTableCreateHeader = header_builder.build()
+            
             headers.append(header)
         
         request: CreateAppTableRequest = CreateAppTableRequest.builder() \
