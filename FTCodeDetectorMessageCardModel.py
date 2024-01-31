@@ -10,11 +10,12 @@
 #             # 业务名称: scan_busi_name
 #             # 业务总数: scan_busi_total_count
 #             # 新增数量: scan_busi_new_count
+#             # 待处理数量: scan_unhandle_count
 #         # 扫描结果: scan_result
 #             # 所属文件: scan_result_file
 #             # 所在行数: scan_line_result
 #             # 所属平台: scan_platform_result
-#             # 负责人: scan_principle_result
+#             # 负责人: scan_principal_result
 #         # 扫描文件url: scan_result_sheets_url
 
 import FTCodeDetectorConfig
@@ -25,12 +26,14 @@ class FTCodeDetectorBusinessMessageCardModel():
         self.scan_busi_name: str = None
         self.scan_busi_new_count: int = 0
         self.scan_busi_total_count: int = 0
+        self.scan_unhandle_count: int = 0
 
     def payload(self) -> dict:
         payload = {
             'scan_busi_name': self.scan_busi_name if self.scan_busi_name != None else 'Unknown',
             'scan_busi_total_count': self.scan_busi_total_count if self.scan_busi_total_count != None else 0,
-            'scan_busi_new_count': self.scan_busi_new_count if self.scan_busi_new_count != None else 0
+            'scan_busi_new_count': self.scan_busi_new_count if self.scan_busi_new_count != None else 0,
+            'scan_unhandle_count': self.scan_unhandle_count if self.scan_unhandle_count != None else 0
         }
 
         return payload
@@ -40,14 +43,14 @@ class FTCodeDetectorScanResultMessageCardModel():
         self.scan_result_file: str = None
         self.scan_line_result: str = None
         self.scan_platform_result: str = None
-        self.scan_principle_result: str = None
+        self.scan_principal_result: str = None
 
     def payload(self) -> dict:
         payload = {
             'scan_result_file': self.scan_result_file if self.scan_result_file != None else 'Unknown',
             'scan_line_result': self.scan_line_result  if self.scan_line_result != None else 'Unknown',
             'scan_platform_result': self.scan_platform_result  if self.scan_platform_result != None else 'Unknown',
-            'scan_principle_result': self.scan_principle_result  if self.scan_principle_result != None else 'Unknown'
+            'scan_principal_result': self.scan_principal_result  if self.scan_principal_result != None else 'Unknown'
         }
 
         return payload

@@ -180,9 +180,10 @@ class FTCodeDetector():
 
         all_records: [FTCodeDetectorFeiShuBitableRecord] = feiShuRequester.list_records(file, file.table_id[business_model.business_type])
 
-        all_records_dict: {str: [FTCodeDetectorFeiShuBitableRecord]} = {}
-        records_deleted_dict: {str: [FTCodeDetectorFeiShuBitableRecord]} = {}
+        all_records_dict: {str: FTCodeDetectorFeiShuBitableRecord} = {}
+        records_deleted_dict: {str: FTCodeDetectorFeiShuBitableRecord} = {}
 
+        unhandled_count: int = 0
         if all_records != None and len(all_records) > 0:
             for item in all_records:
                 all_records_dict[item.hexdigest] = item
@@ -218,6 +219,7 @@ class FTCodeDetector():
             fields[FTCodeDetectorConst.HANDLED_DESC] = FTCodeDetectorConst.HANDLED_RESULT_NONE
             if model.principal_marco != None and model.principal_marco.value != None:
                 fields[FTCodeDetectorConst.HANDLED_DESC] = FTCodeDetectorConst.HANDLED_RESULT_NO
+                unhandled_count += 1
 
                 # department_name: str = self.get_user_department(model.principal_marco.value)
                 # if department_name != None and len(department_name) > 0:
@@ -280,7 +282,7 @@ class FTCodeDetector():
             else:
                 recordsToAppend.append(AppTableRecord.builder().fields(fields).build())
 
-        for item in records_deleted_dict: 
+        for (_, item) in records_deleted_dict.items(): 
             item.fields = {FTCodeDetectorConst.HANDLED_DESC : FTCodeDetectorConst.HANDLED_RESULT_YES}
             recordsToUpdate.append(item)
 
@@ -298,6 +300,7 @@ class FTCodeDetector():
             busiMessageCardModel.scan_busi_name = business_model.business_desc
             busiMessageCardModel.scan_busi_total_count = len(business_model.models if business_model.models != None else [])
             busiMessageCardModel.scan_busi_new_count = len(recordsToAppend)
+            busiMessageCardModel.scan_unhandle_count = unhandled_count
 
             messageCardModel.scan_result_business.append(busiMessageCardModel)
 
@@ -395,7 +398,7 @@ class FTCodeDetector():
             scanResultModel.scan_result_file = model.source_file
             scanResultModel.scan_line_result = '{start} ~ {end}'.format(start = model.start_line + 1, end = model.end_line + 1)
             scanResultModel.scan_platform_result = FTCodeDetectorConfig.platform
-            scanResultModel.scan_principle_result = '<at email={principal}@futunn.com></at>'.format(principal = model.principal_marco.value) if model.principal_marco != None and \
+            scanResultModel.scan_principal_result = '<at email={principal}@futunn.com></at>'.format(principal = model.principal_marco.value) if model.principal_marco != None and \
                                  len(model.principal_marco.value) > 0 else 'Unknown'
             
             messageCardModel.scan_result_item.append(scanResultModel)
