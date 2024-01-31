@@ -1,0 +1,18 @@
+altgraph @ file:///System/Volumes/Data/SWE/Apps/DT/BuildRoots/BuildRoot1/ActiveBuildRoot/Library/Caches/com.apple.xbs/Sources/python3/python3-124/altgraph-0.17.2-py2.py3-none-any.whl
+certifi==2023.7.22
+charset-normalizer==3.2.0
+cmlb @ git+http://gitlab.futunn.com/python/cmlb.git@6bf8619b2b73b3b7446294395fcf6ca159a47abf
+Ftoa @ git+http://gitlab.futunn.com/toobug/ftoa-py.git@7dede967b26c2b3fe59270cf33af75e922b9079e
+future @ file:///System/Volumes/Data/SWE/Apps/DT/BuildRoots/BuildRoot1/ActiveBuildRoot/Library/Caches/com.apple.xbs/Sources/python3/python3-124/future-0.18.2-py3-none-any.whl
+idna==3.4
+lark-oapi==1.0.26
+macholib @ file:///System/Volumes/Data/SWE/Apps/DT/BuildRoots/BuildRoot1/ActiveBuildRoot/Library/Caches/com.apple.xbs/Sources/python3/python3-124/macholib-1.15.2-py2.py3-none-any.whl
+Oasg @ git+http://gitlab.futunn.com/toobug/oasg-py.git@ba523b373a137af2701ec3638471d81b2f918af3
+progress==1.6
+progressbar==2.5
+pycryptodome==3.19.0
+requests==2.31.0
+requests-toolbelt==1.0.0
+six @ file:///System/Volumes/Data/SWE/Apps/DT/BuildRoots/BuildRoot1/ActiveBuildRoot/Library/Caches/com.apple.xbs/Sources/python3/python3-124/six-1.15.0-py2.py3-none-any.whl
+tqdm==4.66.1
+urllib3==2.0.4
