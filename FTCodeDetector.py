@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 # @Author: cairowang
 
+import os
 import sys
 import threading
 import multiprocessing
@@ -26,6 +27,14 @@ from FTCodeDetectorFeiShuBitableFileRequester import FTCodeDetectorFeiShuBitable
 class FTCodeDetector():
     def __init__(self):
         self.ext = ['.h', '.hpp', '.c', '.cxx', '.cpp', '.cc', '.m', '.mm', '.swift']
+        self.config_file = os.path.join(self.module_path(), FTCodeDetectorConst.DEFAULT_CONFIG_FILE_NAME)
+
+    def module_path(self) -> str:
+        path: str = os.path.abspath(__file__)
+        if path == None or len(path) <= 0:
+            return os.getcwd()
+        
+        return os.path.dirname(path)
 
     def print_usage(self):
         print()
@@ -34,6 +43,7 @@ class FTCodeDetector():
         print('--clean:', 'Clean all Project Files. BE CAREFUL')
         print('-d:', 'Specify The Project Directory')
         print('-e:', 'Specify The Files Extensions to Detect, \',\' for split')
+        print('-c:', 'Specify The Config File')
         print('*******************************')
         print()
 
@@ -59,9 +69,18 @@ class FTCodeDetector():
                     print('Must Specify File Extensions When \'-e\' Specified')
                     return False
                 
+            if sys.argv[i] == '-c':
+                if i + 1 < len(sys.argv):
+                    self.config_file = sys.argv[i + 1]
+                else:
+                    print('Must Specify Config File When \'-c\' Specified')
+                    return False
+                
         return True
 
     def run(self) -> dict:
+
+        FTCodeDetectorConfig.load_config(self.config_file)
 
         if self.parse_arg() == False:
             return
@@ -102,6 +121,8 @@ class FTCodeDetector():
 
         business_dict = self.do_categorize(result)
         self.feishu(business_dict)
+
+        FTCodeDetectorConfig.save_config(self.config_file)
 
         return business_dict
     
@@ -421,7 +442,6 @@ class FTCodeDetector():
         feiShuRequester.delete_all_files()
 
         FTCodeDetectorConfig.restore_config()
-        FTCodeDetectorConfig.load_config()
 
     def print(self, business_dict: dict):
         if len(business_dict) <= 0:
@@ -491,4 +511,3 @@ if __name__ == '__main__':
     codeDetector: FTCodeDetector = FTCodeDetector()
 
     codeDetector.print(codeDetector.run())
-    FTCodeDetectorConfig.save_config()

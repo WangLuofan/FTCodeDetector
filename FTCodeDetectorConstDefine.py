@@ -4,6 +4,8 @@
 
 import FTCodeDetectorConst
 
+FTCodeDetectorConst.DEFAULT_CONFIG_FILE_NAME = 'config.json'
+
 FTCodeDetectorConst.DEFAULT_FILE_NAME = '业务代码扫描'
 
 FTCodeDetectorConst.FILE_DESC = '所属文件'

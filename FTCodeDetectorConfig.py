@@ -61,8 +61,6 @@ class FTCodeDetectorConfig():
 
         self.business: dict = {}
 
-        self.load_config()
-
     def get_business(self, business_type: str) -> FTCodeDetectorBusinessConfig:
         if business_type == None or len(business_type) <= 0:
             return None
@@ -144,6 +142,8 @@ class FTCodeDetectorConfig():
         with open(config_file, "w") as f:
             jstr = json.dumps(contents, indent = 4)
             f.write(jstr)
+
+        self.load_config(config_file)
 
     def save_config(self, config_file: str = 'config.json'):
 
