@@ -15,4 +15,4 @@ then
 	exit -1
 fi
 
-$py3 $1 $2 $3
+$py3 $@
